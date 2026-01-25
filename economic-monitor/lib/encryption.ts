@@ -4,12 +4,18 @@ import CryptoJS from 'crypto-js';
 
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'placeholder-key-for-build-time-only-32chars';
 
-// 验证加密密钥长度（仅在运行时验证，构建时使用占位符）
+// 验证加密密钥长度（仅在运行时验证，构建时跳过验证）
 function validateEncryptionKey() {
-  if (!process.env.ENCRYPTION_KEY || process.env.ENCRYPTION_KEY.length < 32) {
+  // 跳过构建时验证（NODE_ENV=test或无加密操作时）
+  if (typeof window !== 'undefined' || process.env.NODE_ENV === 'test') {
+    return;
+  }
+  
+  const key = process.env.ENCRYPTION_KEY;
+  if (!key || key.length < 32 || key === 'placeholder-key-for-build-time-only-32chars') {
     throw new Error(
       'ENCRYPTION_KEY must be set and at least 32 characters long. ' +
-      'Please set it in your .env.local file. ' +
+      'Please set it in your environment variables. ' +
       'Generate one with: openssl rand -base64 32'
     );
   }
