@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
-import { detectAnomalies, type AnomalyResult } from '@/lib/simple-anomaly-detector';
+import { supabaseAdmin, type AnomalyRow } from '@/lib/supabase';
+import { detectBatchAnomalies, AnomalyResult } from '@/lib/anomaly-detector';
 import { getAllIndicators } from '@/lib/fred';
+import { INDICATORS } from '@/lib/fred';
+import { generateAnalysis } from '@/lib/deepseek';
+import { sendAlertEmail } from '@/lib/resend';
 
 export const maxDuration = 300; // 5 分钟
 
@@ -17,116 +20,296 @@ export async function GET(request: Request) {
   }
 
   try {
-    console.log('[Anomaly Check] Starting anomaly detection...');
-    
-    // 获取所有指标数据
-    const { data: economicData, error: dataError } = await supabaseAdmin
-      .from('economic_data')
-      .select('series_id, date, value')
-      .order('date', { ascending: false })
-      .limit(5000); // 限制数据量以提高性能
+    console.log('[Cron] Starting anomaly check...');
 
-    if (dataError) {
-      console.error('[Anomaly Check] Failed to fetch data:', dataError);
-      return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
-    }
-
-    if (!economicData || economicData.length === 0) {
-      console.log('[Anomaly Check] No data available for analysis');
-      return NextResponse.json({
-        success: true,
-        message: 'No data available for analysis',
-        anomalies: [],
-        summary: { totalIndicators: 0, anomalyCount: 0, criticalCount: 0, warningCount: 0 }
-      });
-    }
-
-    // 按指标分组数据
-    const dataByIndicator: { [key: string]: any[] } = {};
-    economicData.forEach(record => {
-      if (!dataByIndicator[record.series_id]) {
-        dataByIndicator[record.series_id] = [];
-      }
-      dataByIndicator[record.series_id].push(record);
-    });
-
-    // 检测每个指标的异常
-    const allAnomalies: AnomalyResult[] = [];
+    const startTime = Date.now();
     const indicators = getAllIndicators();
 
-    for (const [seriesId, data] of Object.entries(dataByIndicator)) {
-      try {
-        const anomalyResult = await detectAnomalies(seriesId, data);
+    // ========== 批量查询（解决 N+1 问题） ==========
+    
+    // 1. 批量查询所有用户
+    const { data: users } = await supabaseAdmin
+      .from('users')
+      .select('id, email, deepseek_api_key_encrypted');
+
+    if (!users || users.length === 0) {
+      console.log('[Cron] No users found');
+      return NextResponse.json({ success: true, message: 'No users' });
+    }
+
+    // 2. 批量查询用户指标配置
+    const { data: allUserConfigs } = await supabaseAdmin
+      .from('user_indicators')
+      .select('*')
+      .eq('enabled', true);
+
+    // 3. 批量查询最近数据
+    const { data: recentData } = await supabaseAdmin
+      .from('economic_data')
+      .select('series_id, date, value')
+      .order('date', { ascending: false });
+
+    if (!recentData || recentData.length === 0) {
+      console.log('[Cron] No recent data found');
+      return NextResponse.json({ success: true, message: 'No data to check' });
+    }
+
+    console.log(`[Cron] Loaded ${users.length} users, ${allUserConfigs?.length || 0} configs, ${recentData.length} data points`);
+
+    // ========== 构建用户配置映射 ==========
+
+    // 按用户和指标建立索引
+    type UserConfigType = { user_id: string; series_id: string; [key: string]: unknown };
+    const userConfigsMap = new Map<string, Map<string, UserConfigType>>();
+
+    for (const config of (allUserConfigs as UserConfigType[] | null | undefined) || []) {
+      if (!userConfigsMap.has(config.user_id)) {
+        userConfigsMap.set(config.user_id, new Map());
+      }
+      userConfigsMap.get(config.user_id)!.set(config.series_id, config);
+    }
+
+    // ========== 准备异常检测数据 ==========
+
+    type RecentDataType = { series_id: string; date: string; value: number | null };
+    const recentDataTyped = recentData as RecentDataType[] | null;
+
+    const detectionData = indicators.map(indicator => {
+      const indicatorData = (recentDataTyped || []).filter(d => d.series_id === indicator.id);
+      if (indicatorData.length < 2) return null;
+
+      const latest = indicatorData[0];
+      const historicalValues = indicatorData
+        .slice(1, 50)  // 使用更多历史数据
+        .map(d => d.value)
+        .filter((v): v is number => v !== null);
+
+      if (historicalValues.length < 12) return null;
+
+      return {
+        seriesId: indicator.id,
+        currentValue: latest.value,
+        historicalValues,
+      };
+    }).filter(Boolean);
+
+    // ========== 批量异常检测 ==========
+    
+    const { results, summary } = detectBatchAnomalies(detectionData as Array<{
+      seriesId: string;
+      currentValue: number;
+      historicalValues: number[];
+    }>);
+
+    // ========== 处理异常（并发优化） ==========
+    
+    const anomaliesToCreate: Array<{
+      userId: string;
+      seriesId: string;
+      date: string;
+      value: number;
+      zScore: number;
+      severity: string;
+    }> = [];
+
+    const anomaliesUpdates: Array<{
+      id: string;
+      seriesId: string;
+      analysis: string;
+      analysisType: 'simple' | 'deep';
+    }> = [];
+
+    const notificationsToSend: Array<{
+      userId: string;
+      email: string;
+      apiKey: string | null;
+      indicatorId: string;
+      indicatorTitle: string;
+      value: number;
+      zScore: number;
+      displayText: string;
+      severity: 'warning' | 'critical';
+    }> = [];
+
+    // 遍历每个指标
+    for (const result of results) {
+      if (result.severity === 'normal') continue;
+      
+      const indicator = INDICATORS[result.seriesId];
+      if (!indicator) continue;
+
+      // 遍历用户
+      for (const user of users) {
+        const userIndicatorConfigs = userConfigsMap.get(user.id);
+        const userConfig = userIndicatorConfigs?.get(result.seriesId);
+
+        if (!userConfig) continue;
+
+        const threshold = result.severity === 'critical'
+          ? Number(userConfig.z_threshold_critical)
+          : Number(userConfig.z_threshold_warning);
+
+        if (Math.abs(result.zScore) < threshold) continue;
+
+        // 记录要创建的异常
+        anomaliesToCreate.push({
+          userId: user.id,
+          seriesId: result.seriesId,
+          date: new Date().toISOString().split('T')[0],
+          value: result.currentValue,
+          zScore: result.zScore,
+          severity: result.severity,
+        });
+
+        // 准备 AI 分析（如果有配置）
+        if (userConfig.analysis_mode !== 'none' && user.deepseek_api_key_encrypted) {
+          const analysisType = userConfig.analysis_mode === 'both' ? 'simple' : 
+                              userConfig.analysis_mode === 'deep' ? 'deep' : 'simple';
+          
+          // 异步生成分析
+          generateAnalysisAsync(
+            result,
+            indicator,
+            user.deepseek_api_key_encrypted,
+            analysisType
+          ).then(analysisResult => {
+            if (analysisResult) {
+              // 存储分析结果供后续更新
+              console.log(`[Cron] Generated ${analysisType} analysis for ${result.seriesId}`);
+            }
+          }).catch(err => {
+            console.error(`[Cron] Analysis failed for ${result.seriesId}:`, err);
+          });
+        }
+
+        // 准备发送通知（如果有配置）
+        if (userConfig.notify_frequency === 'realtime' && user.deepseek_api_key_encrypted) {
+          notificationsToSend.push({
+            userId: user.id,
+            email: user.email,
+            apiKey: user.deepseek_api_key_encrypted,
+            indicatorId: result.seriesId,
+            indicatorTitle: indicator.title,
+            value: result.currentValue,
+            zScore: result.zScore,
+            displayText: result.displayText.zh,
+            severity: result.severity as 'warning' | 'critical',
+          });
+        }
+      }
+    }
+
+    // ========== 批量插入异常记录 ==========
+
+    let anomaliesCreated = 0;
+    let notificationsSent = 0;
+
+    if (anomaliesToCreate.length > 0) {
+      // Convert to database format (snake_case)
+      const anomaliesToInsert = anomaliesToCreate.map(a => ({
+        user_id: a.userId,
+        series_id: a.seriesId,
+        date: a.date,
+        value: a.value,
+        z_score: a.zScore,
+        severity: a.severity,
+      }));
+
+      const { error: insertError } = await supabaseAdmin
+        .from('anomalies')
+        .insert(anomaliesToInsert);
+
+      if (insertError) {
+        console.error('[Cron] Error inserting anomalies:', insertError);
+      } else {
+        anomaliesCreated = anomaliesToCreate.length;
+        console.log(`[Cron] Created ${anomaliesCreated} anomaly records`);
+      }
+    }
+
+    // ========== 并发发送通知 ==========
+    
+    if (notificationsToSend.length > 0) {
+      const notificationPromises = notificationsToSend.map(async (notif) => {
+        const sent = await sendAlertEmail({
+          to: notif.email,
+          seriesId: notif.indicatorId,
+          seriesTitle: notif.indicatorTitle,
+          value: notif.value,
+          zScore: notif.zScore,
+          displayText: notif.displayText,
+          severity: notif.severity,
+          analysis: '',
+          lang: 'zh',
+        });
         
-        if (anomalyResult.severity !== 'normal') {
-          allAnomalies.push(anomalyResult);
-          console.log(`[Anomaly Check] ${anomalyResult.severity.toUpperCase()} anomaly detected in ${seriesId}: Z=${anomalyResult.zScore.toFixed(2)}`);
-        }
-      } catch (error) {
-        console.error(`[Anomaly Check] Error analyzing ${seriesId}:`, error);
-      }
+        return sent ? 1 : 0;
+      });
+
+      const sentResults = await Promise.all(notificationPromises);
+      notificationsSent = sentResults.reduce((a: number, b: number) => a + b, 0);
+      console.log(`[Cron] Sent ${notificationsSent}/${notificationsToSend.length} notifications`);
     }
 
-    // 按严重程度分类
-    const criticalAnomalies = allAnomalies.filter(a => a.severity === 'critical');
-    const warningAnomalies = allAnomalies.filter(a => a.severity === 'warning');
-
-    // 将异常检测结果保存到数据库
-    if (allAnomalies.length > 0) {
-      try {
-        const anomalyRecords = allAnomalies.map(anomaly => ({
-          series_id: anomaly.seriesId,
-          series_title: anomaly.seriesTitle,
-          current_value: anomaly.currentValue,
-          analyzer: anomaly.analyzer,
-          severity: anomaly.severity,
-          z_score: anomaly.zScore,
-          percentile: anomaly.percentile || null,
-          threshold: anomaly.threshold || null,
-          description: anomaly.description,
-          category: anomaly.category,
-          trend: anomaly.trend || null,
-          detected_at: new Date().toISOString(),
-          resolved: false
-        }));
-
-        const { error: insertError } = await supabaseAdmin
-          .from('anomalies')
-          .insert(anomalyRecords);
-
-        if (insertError) {
-          console.error('[Anomaly Check] Failed to save anomalies:', insertError);
-        } else {
-          console.log(`[Anomaly Check] Saved ${anomalyRecords.length} anomalies to database`);
-        }
-      } catch (error) {
-        console.error('[Anomaly Check] Error saving anomalies:', error);
-      }
-    }
-
-    // 生成摘要
-    const summary = {
-      totalIndicators: Object.keys(dataByIndicator).length,
-      anomalyCount: allAnomalies.length,
-      criticalCount: criticalAnomalies.length,
-      warningCount: warningAnomalies.length
-    };
-
-    console.log(`[Anomaly Check] Completed: ${summary.anomalyCount} anomalies detected (${summary.criticalCount} critical, ${summary.warningCount} warnings)`);
+    const duration = Date.now() - startTime;
+    console.log(`[Cron] Anomaly check complete. Duration: ${duration}ms`);
+    console.log(`[Cron] Anomalies: ${anomaliesCreated}, Notifications: ${notificationsSent}`);
 
     return NextResponse.json({
       success: true,
-      message: `Anomaly check completed. Found ${summary.anomalyCount} anomalies.`,
-      anomalies: allAnomalies,
-      summary,
-      timestamp: new Date().toISOString()
+      duration,
+      summary: {
+        indicatorsChecked: results.length,
+        anomaliesDetected: results.filter(r => r.severity !== 'normal').length,
+        anomaliesCreated,
+        notificationsSent,
+      },
+      breakdown: {
+        normal: results.filter(r => r.severity === 'normal').length,
+        warning: results.filter(r => r.severity === 'warning').length,
+        critical: results.filter(r => r.severity === 'critical').length,
+      },
     });
-
   } catch (error) {
-    console.error('[Anomaly Check] Unexpected error:', error);
+    console.error('[Cron] Anomaly check error:', error);
     return NextResponse.json(
       { success: false, error: 'Anomaly check failed' },
       { status: 500 }
     );
+  }
+}
+
+// ========== 异步生成分析 ==========
+
+async function generateAnalysisAsync(
+  result: AnomalyResult,
+  indicator: typeof INDICATORS[string],
+  apiKey: string,
+  analysisType: 'simple' | 'deep'
+): Promise<string | null> {
+  try {
+    const analysisRequest = {
+      seriesId: result.seriesId,
+      seriesTitle: indicator.title,
+      value: result.currentValue,
+      zScore: result.zScore,
+      mean: result.mean || 0,
+      stdDev: result.stdDev || 0,
+      historicalValues: [],
+      displayText: result.displayText.zh,
+      mode: analysisType,
+    };
+
+    const analysis = analysisType === 'deep'
+      ? await import('@/lib/deepseek').then(m => m.generateDeepAnalysis(analysisRequest, apiKey))
+      : await import('@/lib/deepseek').then(m => m.generateAnalysis(analysisRequest, apiKey));
+
+    if (analysis.success) {
+      return analysis.content;
+    }
+    return null;
+  } catch (error) {
+    console.error(`[Cron] Failed to generate ${analysisType} analysis:`, error);
+    return null;
   }
 }

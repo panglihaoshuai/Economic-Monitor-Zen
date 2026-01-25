@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
-import { smartFetchWithLogging, getSchedulerStats } from '@/lib/simple-data-scheduler';
+import { smartFetchWithLogging, getSchedulerStats } from '@/lib/data-scheduler';
 
 export const maxDuration = 300; // 5 分钟
 
@@ -89,19 +89,11 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'seriesId required' }, { status: 400 });
       }
       
-      // 返回默认频率
-      const frequencies: { [key: string]: string } = {
-        'FEDFUNDS': 'daily',
-        'GDP': 'quarterly',
-        'CPIAUCSL': 'monthly',
-        'UNRATE': 'monthly',
-        'DGS10': 'daily'
-      };
-      
+      const { getFrequency } = await import('@/lib/data-scheduler');
       return NextResponse.json({
         success: true,
         seriesId,
-        frequency: frequencies[seriesId] || 'unknown',
+        frequency: getFrequency(seriesId),
       });
     }
 
@@ -119,7 +111,7 @@ export async function POST(request: Request) {
       }
 
       // 获取新鲜度
-      const freshnessResult = await getSchedulerStats();
+      const freshnessResult = await getSchedulerStats(supabaseAdmin);
 
       return NextResponse.json({
         success: true,

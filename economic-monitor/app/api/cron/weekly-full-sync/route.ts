@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
-export const maxDuration = 900; // 15 分钟 for full sync
+export const maxDuration = 300; // 5 分钟 (Vercel 免费版限制)
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     console.log('[Weekly Sync] Starting weekly full data synchronization...');
     
     // 导入fullSync函数
-    const { fullSync } = await import('../../../../lib/simple-full-sync');
+    const { fullSync } = await import('../../../../lib/improved-scheduler');
     
     const startTime = Date.now();
     

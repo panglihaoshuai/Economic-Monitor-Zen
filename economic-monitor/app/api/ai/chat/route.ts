@@ -98,7 +98,7 @@ async function generateSmartResponse(message: string, apiKey: string, lang: Loca
         lowerMessage.includes(indicator.title.toLowerCase()) ||
         lowerMessage.includes(indicator.title.toLowerCase().replace(' ', '-'))) {
 
-      const insight = getInvestmentInsight(id, 0, 0); // 传递占位符值
+      const insight = getInvestmentInsight(id);
       if (insight) {
         return generateIndicatorResponse(id, indicator.title, insight, lang);
       }
@@ -348,7 +348,7 @@ function generatePresetResponse(message: string, lang: Locale): string {
   for (const [id, indicator] of Object.entries(INDICATORS)) {
     if (lowerMessage.includes(id.toLowerCase()) ||
         lowerMessage.includes(indicator.title.toLowerCase())) {
-      const insight = getInvestmentInsight(id, 0, 0); // 传递占位符值
+      const insight = getInvestmentInsight(id);
       if (insight) {
         return generateIndicatorResponse(id, indicator.title, insight, lang);
       }

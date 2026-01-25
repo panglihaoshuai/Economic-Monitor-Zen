@@ -1,6 +1,6 @@
 'use client';
 
-import type { View } from '@/types';
+import type { View } from '../app/page';
 
 interface ZenNavigationProps {
   activeView: View;
