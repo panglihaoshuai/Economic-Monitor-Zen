@@ -3,7 +3,6 @@
   "outputDirectory": ".next",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "ignoreCommand": "echo 'No ignore command configured'",
   "crons": [
     {
       "path": "/api/cron/fetch-data",
