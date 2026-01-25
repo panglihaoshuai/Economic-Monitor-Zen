@@ -1,0 +1,108 @@
+{
+  "common": {
+    "appName": "Economic Monitor",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "export": "Export",
+    "refresh": "Refresh",
+    "view": "View",
+    "back": "Back",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "language": "Language",
+    "english": "English",
+    "chinese": "中文"
+  },
+  "risk": {
+    "conservative": "Conservative",
+    "moderate": "Moderate",
+    "aggressive": "Aggressive"
+  },
+  "home": {
+    "title": "Economic Monitor",
+    "subtitle": "Monitor U.S. Economic Indicators",
+    "description": "Track GDP, unemployment, inflation and more with AI-powered analysis and real-time alerts.",
+    "signInButton": "Sign in with Google",
+    "features": [
+      {
+        "title": "📊 Real-time Monitoring",
+        "description": "Track key economic indicators from FRED API"
+      },
+      {
+        "title": "🔔 Smart Alerts",
+        "description": "Get notified when data deviates from historical norms"
+      },
+      {
+        "title": "🤖 AI Analysis",
+        "description": "DeepSeek-powered insights and recommendations"
+      }
+    ]
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "coreIndicators": "Core Indicators",
+    "allIndicators": "All Indicators",
+    "recentAnomalies": "Recent Anomalies",
+    "viewAll": "View All",
+    "status": {
+      "normal": "Normal",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "deviation": {
+      "above": "Above average",
+      "below": "Below average",
+      "slightlyAbove": "Slightly above average",
+      "slightlyBelow": "Slightly below average",
+      "significantlyAbove": "Significantly above average",
+      "significantlyBelow": "Significantly below average"
+    }
+  },
+  "indicators": {
+    "title": "Indicators",
+    "manage": "Manage Indicators",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "lastUpdated": "Last Updated",
+    "noData": "No data available"
+  },
+  "anomalies": {
+    "title": "Anomalies",
+    "empty": "No anomalies detected",
+    "warning": "Warning",
+    "critical": "Critical",
+    "analyze": "Analyze",
+    "notify": "Notify"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "aiConfig": "AI Configuration",
+    "indicators": "Indicator Settings",
+    "language": "Language",
+    "apiKeys": "API Keys",
+    "saveSuccess": "Settings saved successfully"
+  },
+  "email": {
+    "alertSubject": {
+      "warning": "[Alert] {indicator} Deviation Detected",
+      "critical": "[CRITICAL] {indicator} Abnormal Fluctuation"
+    },
+    "deviationLabel": "Deviation",
+    "dateLabel": "Date",
+    "viewDetails": "View Details",
+    "manageSettings": "Manage notification settings"
+  }
+}

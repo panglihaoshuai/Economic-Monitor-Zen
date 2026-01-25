@@ -1,0 +1,108 @@
+{
+  "common": {
+    "appName": "经济监控",
+    "loading": "加载中...",
+    "error": "发生错误",
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "export": "导出",
+    "refresh": "刷新",
+    "view": "查看",
+    "back": "返回",
+    "close": "关闭",
+    "search": "搜索",
+    "filter": "筛选",
+    "settings": "设置",
+    "dashboard": "仪表盘",
+    "signIn": "登录",
+    "signOut": "退出",
+    "language": "语言",
+    "english": "English",
+    "chinese": "中文"
+  },
+  "risk": {
+    "conservative": "保守型",
+    "moderate": "平衡型",
+    "aggressive": "进取型"
+  },
+  "home": {
+    "title": "经济监控平台",
+    "subtitle": "监控美国经济指标",
+    "description": "追踪GDP、失业率、通胀率等关键经济指标，享受AI驱动的实时分析智能提醒。",
+    "signInButton": "使用 Google 账号登录",
+    "features": [
+      {
+        "title": "📊 实时监控",
+        "description": "从FRED API获取最新经济数据"
+      },
+      {
+        "title": "🔔 智能提醒",
+        "description": "当数据偏离历史均值时自动通知"
+      },
+      {
+        "title": "🤖 AI 分析",
+        "description": "DeepSeek驱动的深度洞察与建议"
+      }
+    ]
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "coreIndicators": "核心指标",
+    "allIndicators": "全部指标",
+    "recentAnomalies": "最近异常",
+    "viewAll": "查看全部",
+    "status": {
+      "normal": "正常",
+      "warning": "警告",
+      "critical": "严重"
+    },
+    "deviation": {
+      "above": "高于均值",
+      "below": "低于均值",
+      "slightlyAbove": "略高于均值",
+      "slightlyBelow": "略低于均值",
+      "significantlyAbove": "大幅高于均值",
+      "significantlyBelow": "大幅低于均值"
+    }
+  },
+  "indicators": {
+    "title": "指标管理",
+    "manage": "管理指标",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "selectAll": "全选",
+    "deselectAll": "取消全选",
+    "lastUpdated": "最后更新",
+    "noData": "暂无数据"
+  },
+  "anomalies": {
+    "title": "异常记录",
+    "empty": "未检测到异常",
+    "warning": "警告",
+    "critical": "严重",
+    "analyze": "分析",
+    "notify": "通知"
+  },
+  "settings": {
+    "title": "设置",
+    "profile": "个人资料",
+    "notifications": "通知设置",
+    "aiConfig": "AI 配置",
+    "indicators": "指标设置",
+    "language": "语言设置",
+    "apiKeys": "API 密钥",
+    "saveSuccess": "设置保存成功"
+  },
+  "email": {
+    "alertSubject": {
+      "warning": "【提醒】{indicator} 偏离历史均值",
+      "critical": "【严重】{indicator} 出现异常波动"
+    },
+    "deviationLabel": "偏离程度",
+    "dateLabel": "日期",
+    "viewDetails": "查看详情",
+    "manageSettings": "管理通知设置"
+  }
+}

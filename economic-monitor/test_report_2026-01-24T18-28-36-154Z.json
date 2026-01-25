@@ -1,0 +1,109 @@
+{
+  "summary": {
+    "startTime": "2026-01-24T18:28:35.113Z",
+    "endTime": "2026-01-24T18:28:36.153Z",
+    "totalDuration": 1040,
+    "passedTests": 6,
+    "totalTests": 8,
+    "passRate": "75.0"
+  },
+  "results": [
+    {
+      "testName": "智能限速器测试",
+      "passed": true,
+      "duration": 103,
+      "details": {
+        "initialTokens": 120,
+        "finalTokens": 120,
+        "completedRequests": 10
+      }
+    },
+    {
+      "testName": "进度跟踪器测试",
+      "passed": true,
+      "duration": 652,
+      "details": {
+        "runId": "run_test_source_1769279315238",
+        "processedRecords": 1150,
+        "successRecords": 1100,
+        "failedRecords": 50
+      }
+    },
+    {
+      "testName": "检查点管理器测试",
+      "passed": true,
+      "duration": 9,
+      "details": {
+        "runId": "test_run_1769279315891",
+        "checkpointId": "data_test_source_1769279315891",
+        "canResume": true,
+        "recommendedAction": "resume"
+      }
+    },
+    {
+      "testName": "批量插入器测试",
+      "passed": false,
+      "duration": 121,
+      "details": {
+        "totalProcessed": 10000,
+        "successCount": 0,
+        "errorCount": 10000,
+        "recordsPerSecond": 86956.52173913043
+      }
+    },
+    {
+      "testName": "管道编排器测试",
+      "passed": true,
+      "duration": 1,
+      "details": {
+        "totalDataSources": 2,
+        "currentPhase": "initializing"
+      }
+    },
+    {
+      "testName": "错误恢复测试",
+      "passed": true,
+      "duration": 0,
+      "details": {
+        "simulatedError": "Simulated database error"
+      }
+    },
+    {
+      "testName": "性能基准测试",
+      "passed": true,
+      "duration": 53,
+      "details": {
+        "recordsPerSecond": 100000,
+        "expectedMinSpeed": 100,
+        "performanceRatio": 1000
+      }
+    },
+    {
+      "testName": "并发处理测试",
+      "passed": false,
+      "duration": 75,
+      "details": {
+        "totalProcessed": 3000,
+        "totalErrors": 3000,
+        "errorRate": 1,
+        "maxErrorRate": 0.1
+      }
+    }
+  ],
+  "config": {
+    "database": {
+      "path": ":memory:",
+      "inMemory": true
+    },
+    "testData": {
+      "recordCount": 10000,
+      "dataSourceCount": 4,
+      "errorRate": 0.05
+    },
+    "performance": {
+      "expectedMinSpeed": 100,
+      "maxErrorRate": 0.1,
+      "timeoutMinutes": 10
+    }
+  }
+}

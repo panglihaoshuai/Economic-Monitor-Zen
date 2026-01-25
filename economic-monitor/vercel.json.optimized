@@ -1,0 +1,20 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/fetch-data",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/check-anomalies", 
+      "schedule": "5 8 * * *"
+    },
+    {
+      "path": "/api/cron/health-check",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-full-sync",
+      "schedule": "0 2 * * 0"
+    }
+  ]
+}
