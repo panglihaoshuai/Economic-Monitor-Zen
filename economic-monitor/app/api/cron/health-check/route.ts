@@ -7,7 +7,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 export async function GET(request: NextRequest) {
   // 验证 CRON_SECRET
   const authHeader = request.headers.get('authorization');
-  if (!CRON_SECRET || authHeader !== \`Bearer \${CRON_SECRET}\`) {
+  if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
     console.warn('[Cron] Unauthorized access attempt to health-check');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }

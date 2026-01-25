@@ -291,7 +291,7 @@ function calculateCyclePosition(indicators: Indicator[]): {
 
 function IndicatorCard({ indicator, onOpenEncyclopedia }: { indicator: Indicator; onOpenEncyclopedia?: (id: string) => void }) {
   const zScore = indicator.latest?.zScore;
-  const insight = getInvestmentInsight(indicator.id);
+  const insight = getInvestmentInsight(indicator.id, indicator.latest?.value || 0, 0); // 传递当前值和变化率
   const [expanded, setExpanded] = useState(false);
 
   const isNormal = zScore?.severity === 'normal';
@@ -348,21 +348,7 @@ function IndicatorCard({ indicator, onOpenEncyclopedia }: { indicator: Indicator
       {expanded && insight && (
         <div className="mb-2 sm:mb-4 p-2 sm:p-3 bg-blue-50 rounded-lg text-xs sm:text-sm">
           <div className="font-medium text-blue-900 mb-1">💡 投资含义 / Investment Insight</div>
-          <div className="text-blue-800 mb-2">{insight.summary}</div>
-          <div className="grid grid-cols-2 gap-1 sm:gap-2 text-xs">
-            <div>
-              <span className="text-red-600">📉 股市 / Stocks：</span>
-              {insight.impactOnStocks}
-            </div>
-            <div>
-              <span className="text-blue-600">📊 债市 / Bonds：</span>
-              {insight.impactOnBonds}
-            </div>
-          </div>
-          <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-blue-200">
-            <span className="font-medium text-blue-900">💼 建议 / Suggestion：</span>
-            <span className="text-blue-800">{insight.suggestion}</span>
-          </div>
+          <div className="text-blue-800 mb-2">{insight}</div>
         </div>
       )}
 

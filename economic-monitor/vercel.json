@@ -4,26 +4,10 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "ignoreCommand": "echo 'No ignore command configured'",
-  "env": {
-    "NEXT_PUBLIC_APP_URL": "https://economic-monitor-zen.vercel.app",
-    "FRED_API_KEY": "@fred_api_key",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "https://economic-monitor-zen.vercel.app",
-    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
-    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
-    "CRON_SECRET": "@cron_secret",
-    "DEEPSEEK_API_KEY": "@deepseek_api_key",
-    "RESEND_API_KEY": "@resend_api_key"
-  },
   "crons": [
     {
       "path": "/api/cron/fetch-data",
-      "schedule": "0 8 * * *"
-    },
-    {
-      "path": "/api/cron/check-anomalies",
-      "schedule": "5 8 * * *"
+      "schedule": "0 0 * * *"
     },
     {
       "path": "/api/cron/weekly-full-sync", 
@@ -31,21 +15,7 @@
     },
     {
       "path": "/api/cron/health-check",
-      "schedule": "0 12 * * *"
+      "schedule": "0 6 * * *"
     }
-  ],
-  "functions": {
-    "app/api/cron/fetch-data/route.ts": {
-      "maxDuration": 300
-    },
-    "app/api/cron/check-anomalies/route.ts": {
-      "maxDuration": 300
-    },
-    "app/api/cron/weekly-full-sync/route.ts": {
-      "maxDuration": 900
-    },
-    "app/api/cron/health-check/route.ts": {
-      "maxDuration": 10
-    }
-  }
+  ]
 }

@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { EconomicDashboard } from '@/components/EconomicDashboard';
 import { TransactionRecords } from '@/components/TransactionRecords';
 import { ZenNavigation } from '@/components/ZenNavigation';
-
-type View = 'dashboard' | 'records';
+import type { View } from '@/types';
 
 export default function Home() {
   const [activeView, setActiveView] = useState<View>('dashboard');

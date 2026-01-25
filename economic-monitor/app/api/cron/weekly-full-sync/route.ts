@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     console.log('[Weekly Sync] Starting weekly full data synchronization...');
     
     // 导入fullSync函数
-    const { fullSync } = await import('../../../../lib/improved-scheduler');
+    const { fullSync } = await import('../../../../lib/simple-full-sync');
     
     const startTime = Date.now();
     
