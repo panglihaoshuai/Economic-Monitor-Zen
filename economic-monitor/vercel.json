@@ -11,31 +11,40 @@
     "NEXTAUTH_URL": "https://economic-monitor-zen.vercel.app",
     "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "CRON_SECRET": "@cron_secret",
     "DEEPSEEK_API_KEY": "@deepseek_api_key",
     "RESEND_API_KEY": "@resend_api_key"
   },
   "crons": [
     {
-      "path": "api/cron/fetch-data",
-      "schedule": "0 0 * * *"
+      "path": "/api/cron/fetch-data",
+      "schedule": "0 8 * * *"
     },
     {
-      "path": "api/cron/weekly-full-sync", 
+      "path": "/api/cron/check-anomalies",
+      "schedule": "5 8 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-full-sync", 
       "schedule": "0 2 * * 0"
     },
     {
-      "path": "api/cron/health-check",
-      "schedule": "*/30 * * * *"
+      "path": "/api/cron/health-check",
+      "schedule": "0 12 * * *"
     }
   ],
   "functions": {
-    "api/cron/fetch-data": {
-      "maxDuration": 60
+    "app/api/cron/fetch-data/route.ts": {
+      "maxDuration": 300
     },
-    "api/cron/weekly-full-sync": {
+    "app/api/cron/check-anomalies/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/cron/weekly-full-sync/route.ts": {
       "maxDuration": 900
     },
-    "api/cron/health-check": {
+    "app/api/cron/health-check/route.ts": {
       "maxDuration": 10
     }
   }
