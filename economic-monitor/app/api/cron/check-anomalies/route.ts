@@ -3,7 +3,6 @@ import { supabaseAdmin, type AnomalyRow } from '@/lib/supabase';
 import { detectBatchAnomalies, AnomalyResult } from '@/lib/anomaly-detector';
 import { getAllIndicators } from '@/lib/fred';
 import { INDICATORS } from '@/lib/fred';
-import { generateAnalysis } from '@/lib/deepseek';
 import { sendAlertEmail } from '@/lib/resend';
 
 export const maxDuration = 300; // 5 分钟
@@ -30,7 +29,7 @@ export async function GET(request: Request) {
     // 1. 批量查询所有用户
     const { data: users } = await supabaseAdmin
       .from('users')
-      .select('id, email, deepseek_api_key_encrypted');
+      .select('id, email');
 
     if (!users || users.length === 0) {
       console.log('[Cron] No users found');
@@ -161,33 +160,12 @@ export async function GET(request: Request) {
           severity: result.severity,
         });
 
-        // 准备 AI 分析（如果有配置）
-        if (userConfig.analysis_mode !== 'none' && user.deepseek_api_key_encrypted) {
-          const analysisType = userConfig.analysis_mode === 'both' ? 'simple' : 
-                              userConfig.analysis_mode === 'deep' ? 'deep' : 'simple';
-          
-          // 异步生成分析
-          generateAnalysisAsync(
-            result,
-            indicator,
-            user.deepseek_api_key_encrypted,
-            analysisType
-          ).then(analysisResult => {
-            if (analysisResult) {
-              // 存储分析结果供后续更新
-              console.log(`[Cron] Generated ${analysisType} analysis for ${result.seriesId}`);
-            }
-          }).catch(err => {
-            console.error(`[Cron] Analysis failed for ${result.seriesId}:`, err);
-          });
-        }
-
         // 准备发送通知（如果有配置）
-        if (userConfig.notify_frequency === 'realtime' && user.deepseek_api_key_encrypted) {
+        if (userConfig.notify_frequency === 'realtime') {
           notificationsToSend.push({
             userId: user.id,
             email: user.email,
-            apiKey: user.deepseek_api_key_encrypted,
+            apiKey: null,
             indicatorId: result.seriesId,
             indicatorTitle: indicator.title,
             value: result.currentValue,
@@ -279,37 +257,3 @@ export async function GET(request: Request) {
   }
 }
 
-// ========== 异步生成分析 ==========
-
-async function generateAnalysisAsync(
-  result: AnomalyResult,
-  indicator: typeof INDICATORS[string],
-  apiKey: string,
-  analysisType: 'simple' | 'deep'
-): Promise<string | null> {
-  try {
-    const analysisRequest = {
-      seriesId: result.seriesId,
-      seriesTitle: indicator.title,
-      value: result.currentValue,
-      zScore: result.zScore,
-      mean: result.mean || 0,
-      stdDev: result.stdDev || 0,
-      historicalValues: [],
-      displayText: result.displayText.zh,
-      mode: analysisType,
-    };
-
-    const analysis = analysisType === 'deep'
-      ? await import('@/lib/deepseek').then(m => m.generateDeepAnalysis(analysisRequest, apiKey))
-      : await import('@/lib/deepseek').then(m => m.generateAnalysis(analysisRequest, apiKey));
-
-    if (analysis.success) {
-      return analysis.content;
-    }
-    return null;
-  } catch (error) {
-    console.error(`[Cron] Failed to generate ${analysisType} analysis:`, error);
-    return null;
-  }
-}
