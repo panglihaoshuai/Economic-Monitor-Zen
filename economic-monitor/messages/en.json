@@ -149,8 +149,6 @@
           "macro": "e.g. Fed rates stable, CPI incoming..."
         }
       },
-      "empty": "Your journal is empty.",
-      "emptySub": "Start by recording your first observation.",
       "options": {
         "buy": "Buy",
         "sell": "Sell",
@@ -170,7 +168,9 @@
           "loss": "Loss",
           "breakeven": "Breakeven"
         }
-      }
+      },
+      "empty": "Your journal is empty.",
+      "emptySub": "Start by recording your first observation."
     },
     "card": {
       "vsLast": "vs last",
@@ -184,16 +184,19 @@
     "emotions": {
       "fear": "Fear",
       "greed": "Greed",
+      "fomo": "FOMO",
+      "confident": "Confident",
+      "uncertain": "Uncertain",
       "neutral": "Neutral",
-      "confidence": "Confidence",
+      "euphoria": "Euphoria",
       "panic": "Panic"
     },
     "marketConditions": {
-      "uncertain": "Uncertain",
-      "bullish": "Bullish",
-      "bearish": "Bearish",
+      "bull": "Bull",
+      "bear": "Bear",
       "sideways": "Sideways",
-      "volatile": "Volatile"
+      "volatile": "Volatile",
+      "uncertain": "Uncertain"
     }
   }
 }

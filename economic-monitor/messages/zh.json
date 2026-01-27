@@ -15,43 +15,43 @@
     "search": "搜索",
     "filter": "筛选",
     "settings": "设置",
-    "dashboard": "仪表盘",
+    "dashboard": "仪表板",
     "signIn": "登录",
-    "signOut": "退出",
+    "signOut": "退出登录",
     "language": "语言",
     "english": "English",
     "chinese": "中文"
   },
   "risk": {
     "conservative": "保守型",
-    "moderate": "平衡型",
-    "aggressive": "进取型"
+    "moderate": "稳健型",
+    "aggressive": "激进型"
   },
   "home": {
-    "title": "经济监控平台",
+    "title": "经济监控",
     "subtitle": "监控美国经济指标",
-    "description": "追踪GDP、失业率、通胀率等关键经济指标，享受AI驱动的实时分析智能提醒。",
-    "signInButton": "使用 Google 账号登录",
+    "description": "通过AI分析和实时警报追踪GDP、失业率、通胀等指标。",
+    "signInButton": "使用 Google 登录",
     "features": [
       {
         "title": "📊 实时监控",
-        "description": "从FRED API获取最新经济数据"
+        "description": "追踪来自 FRED API 的关键经济指标"
       },
       {
-        "title": "🔔 智能提醒",
-        "description": "当数据偏离历史均值时自动通知"
+        "title": "🔔 智能预警",
+        "description": "数据偏离历史常态时及时通知"
       },
       {
         "title": "🤖 AI 分析",
-        "description": "DeepSeek驱动的深度洞察与建议"
+        "description": "DeepSeek 驱动的洞察和建议"
       }
     ]
   },
   "dashboard": {
-    "title": "仪表盘",
+    "title": "仪表板",
     "coreIndicators": "核心指标",
-    "allIndicators": "全部指标",
-    "recentAnomalies": "最近异常",
+    "allIndicators": "所有指标",
+    "recentAnomalies": "近期异动",
     "viewAll": "查看全部",
     "status": {
       "normal": "正常",
@@ -59,27 +59,27 @@
       "critical": "严重"
     },
     "deviation": {
-      "above": "高于均值",
-      "below": "低于均值",
-      "slightlyAbove": "略高于均值",
-      "slightlyBelow": "略低于均值",
-      "significantlyAbove": "大幅高于均值",
-      "significantlyBelow": "大幅低于均值"
+      "above": "高于平均",
+      "below": "低于平均",
+      "slightlyAbove": "略高于平均",
+      "slightlyBelow": "略低于平均",
+      "significantlyAbove": "显著高于平均",
+      "significantlyBelow": "显著低于平均"
     }
   },
   "indicators": {
-    "title": "指标管理",
+    "title": "指标",
     "manage": "管理指标",
     "enabled": "已启用",
     "disabled": "已禁用",
     "selectAll": "全选",
     "deselectAll": "取消全选",
-    "lastUpdated": "最后更新",
+    "lastUpdated": "上次更新",
     "noData": "暂无数据"
   },
   "anomalies": {
-    "title": "异常记录",
-    "empty": "未检测到异常",
+    "title": "异动",
+    "empty": "未检测到异动",
     "warning": "警告",
     "critical": "严重",
     "analyze": "分析",
@@ -88,19 +88,19 @@
   "settings": {
     "title": "设置",
     "profile": "个人资料",
-    "notifications": "通知设置",
+    "notifications": "通知",
     "aiConfig": "AI 配置",
     "indicators": "指标设置",
-    "language": "语言设置",
+    "language": "语言",
     "apiKeys": "API 密钥",
     "saveSuccess": "设置保存成功"
   },
   "email": {
     "alertSubject": {
-      "warning": "【提醒】{indicator} 偏离历史均值",
-      "critical": "【严重】{indicator} 出现异常波动"
+      "warning": "[警告] {indicator} 检测到偏离",
+      "critical": "[严重] {indicator} 异常波动"
     },
-    "deviationLabel": "偏离程度",
+    "deviationLabel": "偏离",
     "dateLabel": "日期",
     "viewDetails": "查看详情",
     "manageSettings": "管理通知设置"
@@ -115,7 +115,7 @@
       "subtitle": "正在使用 {method} 监测 {count} 个关键指标。",
       "anomalies": "检测到异动",
       "marketOverview": "市场概览",
-      "insight": "AI洞察",
+      "insight": "洞察",
       "refresh": "刷新",
       "loading": "正在分析市场脉搏...",
       "error": "获取经济数据失败。"
@@ -149,8 +149,6 @@
           "macro": "例如: 美联储利率决议前夕，CPI预期..."
         }
       },
-      "empty": "您的日记是空的。",
-      "emptySub": "开始记录您的第一个观察吧。",
       "options": {
         "buy": "买入",
         "sell": "卖出",
@@ -170,7 +168,9 @@
           "loss": "亏损",
           "breakeven": "持平"
         }
-      }
+      },
+      "empty": "您的日记是空的。",
+      "emptySub": "开始记录您的第一个观察吧。"
     },
     "card": {
       "vsLast": "对比上期",
@@ -184,16 +184,19 @@
     "emotions": {
       "fear": "恐惧",
       "greed": "贪婪",
+      "fomo": "FOMO",
+      "confident": "自信",
+      "uncertain": "迷茫",
       "neutral": "中性",
-      "confidence": "自信",
+      "euphoria": "狂喜",
       "panic": "恐慌"
     },
     "marketConditions": {
-      "uncertain": "不确定",
-      "bullish": "看涨",
-      "bearish": "看跌",
+      "bull": "牛市",
+      "bear": "熊市",
       "sideways": "震荡",
-      "volatile": "波动"
+      "volatile": "高波动",
+      "uncertain": "不确定"
     }
   }
 }

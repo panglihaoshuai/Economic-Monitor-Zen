@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { ZenCard, ZenBadge, ZenButton, ZenSpinner } from './ui/ZenUI';
 import { ZenSparkline } from './ui/ZenSparkline';
 import { ArrowUpRight, ArrowDownRight, AlertTriangle, Info, RefreshCw } from 'lucide-react';
-import { useTranslation } from '@/lib/language-context';
+import { useLanguage } from '@/lib/language-context';
 
 // ========== Types ==========
 
@@ -22,11 +22,11 @@ interface AnomalyResult {
         name: string;
         reason: string;
         investmentInsight?: {
-            summary: string;
-            interpretation: string;
-            impactOnStocks: string;
-            impactOnBonds: string;
-            suggestion: string;
+            summary: { en: string; zh: string };
+            interpretation: { en: string; zh: string };
+            impactOnStocks: { en: string; zh: string };
+            impactOnBonds: { en: string; zh: string };
+            suggestion: { en: string; zh: string };
         };
     };
 }
@@ -61,7 +61,7 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 // ========== Sub-component: Indicator Card ==========
 
 function IndicatorCard({ indicator }: { indicator: IndicatorSummary }) {
-    const { t } = useTranslation();
+    const { t, language } = useLanguage();
     // Fetch history for sparkline
     const { data: historyData } = useSWR<{ data: { value: number }[] }>(
         `/api/data?seriesId=${indicator.id}&limit=50`,
@@ -79,8 +79,6 @@ function IndicatorCard({ indicator }: { indicator: IndicatorSummary }) {
     const isCritical = severity === 'critical';
     const isWarning = severity === 'warning';
 
-    // Tailwind cannot apply opacity to Hex-variables correctly (e.g. bg-[var(--x)]/5)
-    // So we use standard style injection for the background tint.
     const borderColorClass = isCritical
         ? 'border-[var(--status-error)]'
         : isWarning
@@ -141,7 +139,7 @@ function IndicatorCard({ indicator }: { indicator: IndicatorSummary }) {
                         <Info className="w-3 h-3" />
                         {t('zen.dashboard.insight')}
                     </div>
-                    {anomaly.category.investmentInsight.summary}
+                    {anomaly.category.investmentInsight.summary[language]}
                 </div>
             )}
 
@@ -166,7 +164,7 @@ function IndicatorCard({ indicator }: { indicator: IndicatorSummary }) {
 
 export function RealEconomicDashboard() {
     const { data, error, isLoading, mutate } = useSWR<DashboardResponse>('/api/data', fetcher);
-    const { t } = useTranslation();
+    const { t, language } = useLanguage();
 
     if (error) return (
         <div className="p-10 text-center text-[var(--status-error)]">
@@ -187,17 +185,20 @@ export function RealEconomicDashboard() {
         </div>
     );
 
-    // Categorize indicators by Priority (Logic from anomaly severity or manual list)
+    // Categorize indicators by Priority
     const criticalIndicators = data.indicators.filter(i => i.anomaly?.severity === 'critical');
     const warningIndicators = data.indicators.filter(i => i.anomaly?.severity === 'warning');
     const normalIndicators = data.indicators.filter(i => i.anomaly?.severity === 'normal' || !i.anomaly);
 
-    // Sort: GARCH first for high frequency
     const sortedNormal = [...normalIndicators].sort((a, b) => {
         if (a.analyzer === 'garch' && b.analyzer !== 'garch') return -1;
         if (a.analyzer !== 'garch' && b.analyzer === 'garch') return 1;
         return 0;
     });
+
+    const methodLabel = data.summary.anomalyCount > 0
+        ? (language === 'zh' ? '异常检测' : 'Anomaly Detection')
+        : (language === 'zh' ? '标准分析' : 'Standard Analysis');
 
     return (
         <div className="space-y-12 animate-fade-in">
@@ -208,7 +209,7 @@ export function RealEconomicDashboard() {
                     <p className="text-[var(--text-secondary)] mt-2 max-w-xl">
                         {t('zen.dashboard.subtitle', {
                             count: data.summary.totalIndicators,
-                            method: data.summary.anomalyCount > 0 ? 'Anomaly Detection' : 'Standard Analysis'
+                            method: methodLabel
                         })}
                     </p>
                 </div>
@@ -218,7 +219,7 @@ export function RealEconomicDashboard() {
                 </ZenButton>
             </header>
 
-            {/* Critical Section (Only if anomalies exist) */}
+            {/* Critical Section */}
             {(criticalIndicators.length > 0 || warningIndicators.length > 0) && (
                 <section className="space-y-6">
                     <div className="flex items-center gap-2">
