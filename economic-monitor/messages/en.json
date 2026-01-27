@@ -104,5 +104,96 @@
     "dateLabel": "Date",
     "viewDetails": "View Details",
     "manageSettings": "Manage notification settings"
+  },
+  "zen": {
+    "nav": {
+      "monitor": "Monitor",
+      "journal": "Journal"
+    },
+    "dashboard": {
+      "title": "Economic Pulse",
+      "subtitle": "Monitoring {count} key indicators using {method}.",
+      "anomalies": "Anomalies Detected",
+      "marketOverview": "Market Overview",
+      "insight": "Insight",
+      "refresh": "Refresh",
+      "loading": "Analyzing market pulse...",
+      "error": "Failed to load economic data."
+    },
+    "journal": {
+      "title": "Trade Journal",
+      "subtitle": "Record your decisions, emotions, and the macro context.",
+      "history": "History",
+      "localStorage": "LOCAL STORAGE ONLY",
+      "newEntry": "New Entry",
+      "stats": {
+        "total": "Total Trades",
+        "winRate": "Win Rate",
+        "pnl": "Net P&L",
+        "avgRating": "Avg Rating"
+      },
+      "form": {
+        "asset": "Asset",
+        "action": "Action",
+        "status": "Status",
+        "rationale": "Logic / Rationale",
+        "marketCondition": "Market Condition",
+        "emotion": "Emotion Check",
+        "intensity": "Intensity",
+        "macro": "Macro Context",
+        "save": "Save Entry",
+        "cancel": "Cancel",
+        "placeholder": {
+          "asset": "e.g. BTC, NVDA",
+          "rationale": "Why are you taking this trade?",
+          "macro": "e.g. Fed rates stable, CPI incoming..."
+        }
+      },
+      "empty": "Your journal is empty.",
+      "emptySub": "Start by recording your first observation.",
+      "options": {
+        "buy": "Buy",
+        "sell": "Sell",
+        "hold": "Hold",
+        "watch": "Watch",
+        "planned": "Planned",
+        "executed": "Executed"
+      },
+      "entry": {
+        "macroAndLogic": "Macro Context & Logic",
+        "keyIndicators": "Key Indicators at Decision Time",
+        "retrospective": "Trade Retrospective",
+        "macro": "Macro",
+        "logic": "Logic",
+        "outcome": {
+          "profit": "Profit",
+          "loss": "Loss",
+          "breakeven": "Breakeven"
+        }
+      }
+    },
+    "card": {
+      "vsLast": "vs last",
+      "loading": "Loading trend..."
+    },
+    "status": {
+      "abnormal": "Abnormal",
+      "warning": "Warning",
+      "critical": "Critical"
+    },
+    "emotions": {
+      "fear": "Fear",
+      "greed": "Greed",
+      "neutral": "Neutral",
+      "confidence": "Confidence",
+      "panic": "Panic"
+    },
+    "marketConditions": {
+      "uncertain": "Uncertain",
+      "bullish": "Bullish",
+      "bearish": "Bearish",
+      "sideways": "Sideways",
+      "volatile": "Volatile"
+    }
   }
 }

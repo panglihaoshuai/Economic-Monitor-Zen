@@ -104,5 +104,96 @@
     "dateLabel": "日期",
     "viewDetails": "查看详情",
     "manageSettings": "管理通知设置"
+  },
+  "zen": {
+    "nav": {
+      "monitor": "市场监测",
+      "journal": "交易日记"
+    },
+    "dashboard": {
+      "title": "经济脉搏",
+      "subtitle": "正在使用 {method} 监测 {count} 个关键指标。",
+      "anomalies": "检测到异动",
+      "marketOverview": "市场概览",
+      "insight": "AI洞察",
+      "refresh": "刷新",
+      "loading": "正在分析市场脉搏...",
+      "error": "获取经济数据失败。"
+    },
+    "journal": {
+      "title": "交易日记",
+      "subtitle": "记录决策、情绪与宏观背景。",
+      "history": "历史记录",
+      "localStorage": "仅本地存储",
+      "newEntry": "新条目",
+      "stats": {
+        "total": "总交易",
+        "winRate": "胜率",
+        "pnl": "净盈亏",
+        "avgRating": "平均评分"
+      },
+      "form": {
+        "asset": "标的",
+        "action": "方向",
+        "status": "状态",
+        "rationale": "交易逻辑",
+        "marketCondition": "市场环境",
+        "emotion": "情绪自查",
+        "intensity": "强度",
+        "macro": "宏观背景",
+        "save": "保存条目",
+        "cancel": "取消",
+        "placeholder": {
+          "asset": "例如: NVDA, BTC",
+          "rationale": "为什么进行这笔交易？",
+          "macro": "例如: 美联储利率决议前夕，CPI预期..."
+        }
+      },
+      "empty": "您的日记是空的。",
+      "emptySub": "开始记录您的第一个观察吧。",
+      "options": {
+        "buy": "买入",
+        "sell": "卖出",
+        "hold": "持有",
+        "watch": "观察",
+        "planned": "计划中",
+        "executed": "已执行"
+      },
+      "entry": {
+        "macroAndLogic": "宏观背景 & 逻辑",
+        "keyIndicators": "决策时刻的关键指标",
+        "retrospective": "交易复盘",
+        "macro": "宏观",
+        "logic": "逻辑",
+        "outcome": {
+          "profit": "盈利",
+          "loss": "亏损",
+          "breakeven": "持平"
+        }
+      }
+    },
+    "card": {
+      "vsLast": "对比上期",
+      "loading": "加载趋势..."
+    },
+    "status": {
+      "abnormal": "异常",
+      "warning": "警报",
+      "critical": "严重"
+    },
+    "emotions": {
+      "fear": "恐惧",
+      "greed": "贪婪",
+      "neutral": "中性",
+      "confidence": "自信",
+      "panic": "恐慌"
+    },
+    "marketConditions": {
+      "uncertain": "不确定",
+      "bullish": "看涨",
+      "bearish": "看跌",
+      "sideways": "震荡",
+      "volatile": "波动"
+    }
   }
 }

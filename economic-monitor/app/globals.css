@@ -1,50 +1,182 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* 禅意主题变量 */
-:root {
-  /* Tokyo Night 配色方案 */
-  --bg-primary: #1a1b26;
-  --bg-secondary: #24283b;
-  --bg-tertiary: #414868;
-  --surface: #565f89;
-  --off-white: #f5f2ed;
-  --text-primary: #c0caf5;
-  --text-secondary: #9aa5ce;
-  --text-muted: #565f89;
-  --accent: #7aa2f7;
-  --accent-subtle: #89b4fa;
-  --success: #9ece6a;
-  --warning: #e0af68;
-  --error: #f7768e;
-  --border: #414868;
-  --shadow: rgba(0, 0, 0, 0.3);
+@layer base {
+  :root {
+    /* Scandinavian Zen Color Palette */
+
+    /* Backgrounds: Warm, paper-like foundations */
+    --bg-main: #F7F6F3;
+    --bg-card: #FFFFFF;
+    --bg-subtle: #F2F0ED;
+
+    /* Text: Soft but high contrast */
+    --text-primary: #2D2D2D;
+    /* Almost black */
+    --text-secondary: #6B6B6B;
+    /* Warm gray */
+    --text-muted: #8E8E93;
+    /* Muted gray */
+
+    /* Accents: Nature-inspired */
+    --accent-sage: #7C9070;
+    /* Primary action / Positive */
+    --accent-sage-light: #E4F2E4;
+    --accent-terracotta: #D4845E;
+    /* Warning / Highlight */
+    --accent-terracotta-light: #FFF4E5;
+    --accent-stone: #E5E4E1;
+    /* Borders / Separators */
+
+    /* Status Colors */
+    --status-success: #7C9070;
+    --status-warning: #D4845E;
+    --status-error: #B05555;
+    --status-neutral: #8E8E93;
+
+    /* Strokes */
+    --stroke-light: #F0EFEC;
+    --stroke-medium: #E5E4E1;
+  }
+
+  /* Dark mode mappings (if needed later, but keeping minimalistic bright for now) */
+  .dark {
+    --bg-main: #1C1C1E;
+    --bg-card: #2C2C2E;
+    --bg-subtle: #3A3A3C;
+    --text-primary: #F2F2F7;
+    --text-secondary: #AEAEB2;
+    --text-muted: #636366;
+    --accent-sage: #9CB58C;
+    --accent-terracotta: #E69F7A;
+    --stroke-light: #3A3A3C;
+  }
 }
 
-/* 基础样式 */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  body {
+    @apply bg-[var(--bg-main)] text-[var(--text-primary)] antialiased font-sans selection:bg-[var(--accent-sage)] selection:text-white;
+  }
+
+  /* Typography Scale */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-serif tracking-tight text-[var(--text-primary)];
+  }
+
+  /* Smooth Scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
+@layer components {
+
+  /* Cards */
+  .zen-card {
+    @apply bg-[var(--bg-card)] rounded-2xl border border-[var(--stroke-light)] p-6 transition-all duration-300;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+  }
+
+  .zen-card:hover {
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+    /* border-[var(--accent-sage)]/20 caused a parser error, using standard CSS instead */
+    border-color: #7C907033;
+    /* Hex with 20% opacity */
+  }
+
+  .zen-card-active {
+    /* Fixed Tailwind parser error for dynamic ring transparency */
+    border-color: #7C9070;
+    box-shadow: 0 0 0 1px #7C907033;
+    /* Equivalent to ring-1 ring-sage/20 */
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-[var(--accent-sage)] text-white px-5 py-2.5 rounded-full font-medium transition-all duration-200 hover:bg-[#6A7B60] active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm tracking-wide;
+  }
+
+  .btn-secondary {
+    @apply bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--stroke-medium)] px-5 py-2.5 rounded-full font-medium transition-all duration-200 hover:border-[var(--accent-sage)] hover:text-[var(--accent-sage)] active:scale-95 text-sm tracking-wide;
+  }
+
+  .btn-ghost {
+    @apply text-[var(--text-secondary)] px-4 py-2 rounded-full font-medium transition-colors hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)];
+  }
+
+  /* Inputs */
+  .zen-input {
+    @apply w-full bg-[var(--bg-card)] border border-[var(--stroke-medium)] rounded-xl px-4 py-3 outline-none transition-all duration-200 placeholder:text-[var(--text-muted)];
+  }
+
+  .zen-input:focus {
+    border-color: #7C9070;
+    box-shadow: 0 0 0 2px #7C90701A;
+    /* Equivalent to focus:ring-2 focus:ring-sage/10 */
+  }
+
+  .zen-label {
+    @apply block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-2 ml-1;
+  }
+
+  /* Badges */
+  .badge {
+    @apply px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase inline-flex items-center gap-1.5;
+  }
+
+  .badge-sage {
+    @apply bg-[var(--accent-sage-light)] text-[#4A5D43];
+  }
+
+  .badge-terracotta {
+    @apply bg-[var(--accent-terracotta-light)] text-[#B06A4B];
+  }
+
+  .badge-neutral {
+    @apply bg-[var(--bg-subtle)] text-[var(--text-secondary)];
+  }
 }
 
-body {
-  font-family: 'Noto Sans SC', 'Inter', sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  line-height: 1.6;
-  font-weight: 400;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* 极简滚动条 */
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-200 {
+  animation-delay: 200ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -52,365 +184,23 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--surface);
-  border-radius: 2px;
+  background: #E5E4E1;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border);
+  background: #C9C8C5;
 }
 
-/* 禅意卡片 */
-.zen-card {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  border: 1px solid var(--border);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px var(--shadow);
-  transition: all 0.3s ease;
+/* Utilities */
+.text-sage {
+  color: var(--accent-sage);
 }
 
-.zen-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+.text-terracotta {
+  color: var(--accent-terracotta);
 }
 
-/* 动画效果 */
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+.bg-paper {
+  background-color: var(--bg-main);
 }
-
-@keyframes pulse-zen {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-zen {
-  animation: pulse-zen 4s ease-in-out infinite;
-}
-
-/* 渐变背景 */
-.bg-gradient-main {
-  background: linear-gradient(135deg, 
-    #1a1b26 0%, 
-    #1f2335 50%, 
-    #24283b 100%);
-}
-
-/* 玻璃效果 */
-.bg-glass {
-  background: rgba(26, 27, 38, 0.6);
-  backdrop-filter: blur(10px);
-}
-
-/* 文字渐变 */
-.text-gradient {
-  background: linear-gradient(135deg, var(--accent), var(--accent-subtle));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* 工具类 */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-.tracking-tight {
-  letter-spacing: -0.02em;
-}
-
-.tracking-wide {
-  letter-spacing: 0.025em;
-}
-
-/* 容器 */
-.container {
-  max-width: 80rem;
-  margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-@media (min-width: 640px) {
-  .container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-/* 网格 */
-.grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.grid-cols-1 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.grid-cols-2 {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.grid-cols-4 {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-@media (min-width: 768px) {
-  .md\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  
-  .md\:grid-cols-4 {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* Flexbox */
-.flex {
-  display: flex;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.inline-flex {
-  display: inline-flex;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.items-start {
-  align-items: flex-start;
-}
-
-.items-end {
-  align-items: flex-end;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.justify-end {
-  justify-content: flex-end;
-}
-
-.flex-1 {
-  flex: 1 1 0%;
-}
-
-/* 文字对齐 */
-.text-center {
-  text-align: center;
-}
-
-.text-right {
-  text-align: right;
-}
-
-/* 间距 */
-.space-y-2 > * + * {
-  margin-top: 0.5rem;
-}
-
-.space-y-3 > * + * {
-  margin-top: 0.75rem;
-}
-
-.space-y-4 > * + * {
-  margin-top: 1rem;
-}
-
-.space-y-6 > * + * {
-  margin-top: 1.5rem;
-}
-
-.space-y-8 > * + * {
-  margin-top: 2rem;
-}
-
-.space-y-10 > * + * {
-  margin-top: 2.5rem;
-}
-
-.space-y-12 > * + * {
-  margin-top: 3rem;
-}
-
-.space-x-2 > * + * {
-  margin-left: 0.5rem;
-}
-
-.space-x-3 > * + * {
-  margin-left: 0.75rem;
-}
-
-.space-x-4 > * + * {
-  margin-left: 1rem;
-}
-
-.space-x-6 > * + * {
-  margin-left: 1.5rem;
-}
-
-.space-x-8 > * + * {
-  margin-left: 2rem;
-}
-
-/* 圆角 */
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.rounded-xl {
-  border-radius: 0.75rem;
-}
-
-.rounded-2xl {
-  border-radius: 1rem;
-}
-
-.rounded-full {
-  border-radius: 9999px;
-}
-
-.rounded-md {
-  border-radius: 0.375rem;
-}
-
-/* 内边距 */
-.p-1 { padding: 0.25rem; }
-.p-2 { padding: 0.5rem; }
-.p-3 { padding: 0.75rem; }
-.p-4 { padding: 1rem; }
-.p-6 { padding: 1.5rem; }
-.p-8 { padding: 2rem; }
-
-.px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
-.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
-.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
-.px-4 { padding-left: 1rem; padding-right: 1rem; }
-.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
-.px-8 { padding-left: 2rem; padding-right: 2rem; }
-
-.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
-.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
-.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
-.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
-.py-10 { padding-top: 2.5rem; padding-bottom: 2.5rem; }
-.py-12 { padding-top: 3rem; padding-bottom: 3rem; }
-
-/* 外边距 */
-.m-1 { margin: 0.25rem; }
-.m-2 { margin: 0.5rem; }
-.m-3 { margin: 0.75rem; }
-.m-4 { margin: 1rem; }
-.m-6 { margin: 1.5rem; }
-.m-8 { margin: 2rem; }
-
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.mb-1 { margin-bottom: 0.25rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.mb-3 { margin-bottom: 0.75rem; }
-.mb-4 { margin-bottom: 1rem; }
-.mb-6 { margin-bottom: 1.5rem; }
-.mb-8 { margin-bottom: 2rem; }
-
-.mt-2 { margin-top: 0.5rem; }
-
-/* 最小高度 */
-.min-h-screen {
-  min-height: 100vh;
-}
-
-/* 位置 */
-.relative { position: relative; }
-.absolute { position: absolute; }
-.fixed { position: fixed; }
-.inset-0 { inset: 0; }
-.bottom-0 { bottom: 0; }
-.left-0 { left: 0; }
-.right-0 { right: 0; }
-.top-0 { top: 0; }
-.z-50 { z-index: 50; }
-
-/* 宽度 */
-.w-2 { width: 0.5rem; }
-.w-4 { width: 1rem; }
-.w-6 { width: 1.5rem; }
-.w-8 { width: 2rem; }
-.w-16 { width: 4rem; }
-.w-24 { width: 6rem; }
-.w-full { width: 100%; }
-
-.max-w-4xl { max-width: 56rem; }
-.max-w-7xl { max-width: 80rem; }
-.max-w-2xl { max-width: 42rem; }
-
-/* 高度 */
-.h-0 { height: 0; }
-.h-0-5 { height: 0.125rem; }
-.h-1 { height: 0.25rem; }
-.h-2 { height: 0.5rem; }
-.h-4 { height: 1rem; }
-.h-6 { height: 1.5rem; }
-.h-8 { height: 2rem; }
-.h-20 { height: 5rem; }
-
-/* 过渡效果 */
-.transition-all { transition: all 0.15s ease; }
-.transition-colors { transition: color, background-color, border-color 0.15s ease; }
-.duration-200 { transition-duration: 200ms; }
-.duration-300 { transition-duration: 300ms; }
-.duration-500 { transition-duration: 500ms; }
-
-/* 字体 */
-.text-xs { font-size: 0.75rem; line-height: 1rem; }
-.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-.text-base { font-size: 1rem; line-height: 1.5rem; }
-.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-.text-2xl { font-size: 1.5rem; line-height: 2rem; }
-.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-.text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
-
-.font-light { font-weight: 300; }
-.font-medium { font-weight: 500; }
-
-/* 透明度 */
-.opacity-60 { opacity: 0.6; }
-.opacity-70 { opacity: 0.7; }
-
-/* 显示 */
-.hidden { display: none; }
-
-/* 模糊 */
-.backdrop-blur-xl { backdrop-filter: blur(16px); }
-.backdrop-blur-sm { backdrop-filter: blur(4px); }

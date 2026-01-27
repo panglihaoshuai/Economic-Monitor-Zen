@@ -62,19 +62,9 @@ export function LanguageProvider({ children, initialLang = 'en' }: { children: R
 
   const setLanguage = (lang: Locale) => {
     setLanguageState(lang);
-    localStorage.setItem('preferred-language', lang);
-
-    // Update URL if using path-based routing
-    const currentPath = pathname || '/';
-    let newPath: string;
-
-    if (lang === 'zh') {
-      newPath = currentPath.startsWith('/zh') ? currentPath : `/zh${currentPath}`;
-    } else {
-      newPath = currentPath.startsWith('/zh') ? currentPath.replace(/^\/zh/, '') || '/' : currentPath;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('preferred-language', lang);
     }
-
-    router.push(newPath);
   };
 
   const t = (key: string, params?: Record<string, string | number>): string => {
