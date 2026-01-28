@@ -84,6 +84,82 @@ export function detectAnomaly(
   }
 }
 
+/**
+ * 检测异常数据（兼容旧 API）
+ * @param seriesId 指标 ID
+ * @param data 数据数组（包含 value 字段的对象数组）
+ * @returns 异常检测结果
+ */
+export async function detectAnomalies(
+  seriesId: string,
+  data: any[]
+): Promise<AnomalyResult> {
+  try {
+    if (!data || data.length < 2) {
+      const indicator = getIndicatorInfo(seriesId);
+      return {
+        seriesId,
+        seriesTitle: indicator?.title || seriesId,
+        currentValue: 0,
+        analyzer: 'zscore',
+        severity: 'normal',
+        zScore: 0,
+        displayText: {
+          en: 'Insufficient data for anomaly detection',
+          zh: '数据不足，无法进行异常检测'
+        },
+        explanation: 'Insufficient data for anomaly detection'
+      };
+    }
+
+    // 提取数值数组
+    const values = data
+      .map(d => typeof d.value === 'number' ? d.value : parseFloat(d.value))
+      .filter(v => !isNaN(v) && v !== null);
+
+    if (values.length < 2) {
+      const indicator = getIndicatorInfo(seriesId);
+      return {
+        seriesId,
+        seriesTitle: indicator?.title || seriesId,
+        currentValue: values[0] || 0,
+        analyzer: 'zscore',
+        severity: 'normal',
+        zScore: 0,
+        displayText: {
+          en: 'Insufficient numeric data for anomaly detection',
+          zh: '数值数据不足，无法进行异常检测'
+        },
+        explanation: 'Insufficient numeric data for anomaly detection'
+      };
+    }
+
+    // 获取当前值（数据按日期降序排列，第一个是最新的）
+    const currentValue = values[0];
+
+    // 历史值（排除当前值）
+    const historicalValues = values.slice(1);
+
+    // 使用统一的检测函数
+    return detectAnomaly(seriesId, currentValue, historicalValues);
+  } catch (error) {
+    console.error(`[Anomaly Detector] Error analyzing ${seriesId}:`, error);
+    return {
+      seriesId,
+      seriesTitle: seriesId,
+      currentValue: 0,
+      analyzer: 'zscore',
+      severity: 'normal',
+      zScore: 0,
+      displayText: {
+        en: `Error in anomaly detection: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        zh: `异常检测错误: ${error instanceof Error ? error.message : '未知错误'}`
+      },
+      explanation: `Error in anomaly detection: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+}
+
 
 
 /**
@@ -103,7 +179,7 @@ function detectWithGARCH(
     useMLE: true,
     minDataPoints: getRecommendedWindow(seriesId)
   });
-  
+
   return convertEnhancedGARCHResult(
     seriesId,
     currentValue,
@@ -124,7 +200,7 @@ function convertEnhancedGARCHResult(
   category?: ReturnType<typeof getIndicatorCategory>
 ): AnomalyResult {
   const thresholds = category?.thresholds || { warning: 2, critical: 3 };
-  
+
   return {
     seriesId,
     seriesTitle: indicator?.title || seriesId,
@@ -135,8 +211,8 @@ function convertEnhancedGARCHResult(
     mean: undefined, // GARCH 不直接提供均值
     stdDev: garchResult.conditionalVolatility,
     trend: garchResult.zScore > 0 ? 'up' : garchResult.zScore < 0 ? 'down' : 'stable',
-    volatility: garchResult.conditionalVolatility > 0.5 ? 'high' : 
-                 garchResult.conditionalVolatility > 0.2 ? 'medium' : 'low',
+    volatility: garchResult.conditionalVolatility > 0.5 ? 'high' :
+      garchResult.conditionalVolatility > 0.2 ? 'medium' : 'low',
     confidence: garchResult.confidence,
     garchParams: {
       omega: garchResult.longRunVariance,
@@ -163,7 +239,7 @@ function convertGARCHResult(
   category?: ReturnType<typeof getIndicatorCategory>
 ): AnomalyResult {
   const thresholds = category?.thresholds || { warning: 2, critical: 3 };
-  
+
   return {
     seriesId,
     seriesTitle: indicator?.title || seriesId,
@@ -174,8 +250,8 @@ function convertGARCHResult(
     mean: undefined, // GARCH 不直接提供均值
     stdDev: garchResult.conditionalVolatility,
     trend: garchResult.zScore > 0 ? 'up' : garchResult.zScore < 0 ? 'down' : 'stable',
-    volatility: garchResult.conditionalVolatility > 0.5 ? 'high' : 
-                 garchResult.conditionalVolatility > 0.2 ? 'medium' : 'low',
+    volatility: garchResult.conditionalVolatility > 0.5 ? 'high' :
+      garchResult.conditionalVolatility > 0.2 ? 'medium' : 'low',
     displayText: {
       en: `GARCH Analysis: Z=${garchResult.zScore.toFixed(2)}, Volatility=${garchResult.conditionalVolatility.toFixed(4)}%`,
       zh: `GARCH分析: Z分数=${garchResult.zScore.toFixed(2)}, 波动率=${garchResult.conditionalVolatility.toFixed(4)}%`

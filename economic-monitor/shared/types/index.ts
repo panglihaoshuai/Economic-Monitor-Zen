@@ -22,57 +22,57 @@ export type DateTime = string;
 export type TradeDirection = 'long' | 'short';
 
 /** 资产类别 */
-export type AssetClass = 'stock' | 'crypto' | 'futures';
+export type AssetClass = 'stock' | 'crypto' | 'futures' | 'forex' | 'commodity' | 'bond';
 
 /** 交易类型 */
-export type TradeType = 'trend' | 'swing' | 'day' | 'position';
+export type TradeType = 'trend' | 'swing' | 'day' | 'position' | 'spot' | 'margin' | 'options';
 
 /** 交易状态 */
 export type TradeStatus = 'open' | 'closed' | 'cancelled';
 
 /** 情绪标签 - 自动识别 */
-export type EmotionTag = 'calm' | 'fomo' | 'greed' | 'panic' | 'revenge';
+export type EmotionTag = 'calm' | 'fomo' | 'greed' | 'panic' | 'revenge' | string;
 
 /** 交易记录 */
 export interface Trade {
   id: UUID;
   userId: UUID;
-  
+
   // 基础信息
   symbol: string;
   assetClass: AssetClass;
   direction: TradeDirection;
   tradeType: TradeType;
-  
+
   // 价格与数量
   entryPrice: number;
   exitPrice?: number;
   quantity: number;
-  
+
   // 仓位管理
   positionSize: number;      // 0.2 = 20%
   leverage: number;          // 1x = 现货
-  
+
   // 时间
   entryTime: DateTime;
   exitTime?: DateTime;
   holdingPeriodHours?: number;
-  
+
   // 结果
   pnlPercent?: number;
   pnlAmount?: number;
   status: TradeStatus;
-  
+
   // 标签与备注
   tags: string[];
   note?: string;
-  
+
   // 宏观关联
   macroCorrelations: MacroCorrelation[];
-  
+
   // 情绪（自动识别）
   emotionTag?: EmotionTag;
-  
+
   // 元数据
   createdAt: DateTime;
   updatedAt: DateTime;
@@ -94,7 +94,7 @@ export interface MacroCorrelation {
 export type IndicatorStatus = 'normal' | 'warning' | 'critical';
 
 /** 经济周期阶段 */
-export type CyclePhase = 
+export type CyclePhase =
   | 'early_expansion'   // 扩张前期
   | 'mid_expansion'     // 扩张中期
   | 'late_expansion'    // 扩张后期
@@ -156,30 +156,30 @@ export interface MonthlyStats {
 export interface CorrelationStats {
   indicatorId: string;
   indicatorName: string;
-  
+
   totalTrades: number;
-  
+
   followed: {
     count: number;
     avgPnl: number;
     winRate: number;
     totalPnl: number;
   };
-  
+
   ignored: {
     count: number;
     avgPnl: number;
     winRate: number;
     totalPnl: number;
   };
-  
+
   opposite: {
     count: number;
     avgPnl: number;
     winRate: number;
     totalPnl: number;
   };
-  
+
   conclusion: string;        // AI 生成的结论
 }
 
@@ -199,22 +199,22 @@ export interface EmotionStats {
 /** 用户配置 */
 export interface UserConfig {
   id: UUID;
-  
+
   // 偏好设置
   riskTolerance: 'conservative' | 'moderate' | 'aggressive';
   language: 'en' | 'zh';
-  
+
   // 通知设置
   notifyOnAnomaly: boolean;
   notifyOnSignal: boolean;
-  
+
   // 监控设置
   monitoredIndicators: string[];
   alertThresholds: Record<string, number>;
-  
+
   // API 配置（预留）
   deepseekApiKey?: string;
-  
+
   // 元数据
   createdAt: DateTime;
   updatedAt: DateTime;

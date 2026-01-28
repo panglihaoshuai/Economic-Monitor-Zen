@@ -154,10 +154,10 @@ export default function DashboardPage() {
 
 // ========== 周期定位组件 ==========
 
-function CyclePositionBanner({ 
-  position, 
-  indicators 
-}: { 
+function CyclePositionBanner({
+  position,
+  indicators
+}: {
   position: { phase: string; risk: string; suggestion: string; color: string };
   indicators: Indicator[];
 }) {
@@ -175,9 +175,9 @@ function CyclePositionBanner({
       'bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-4 sm:p-6 text-white',
       'border-l-4',
       position.color === 'blue' ? 'border-l-blue-500' :
-      position.color === 'green' ? 'border-l-green-500' :
-      position.color === 'amber' ? 'border-l-amber-500' :
-      'border-l-red-500'
+        position.color === 'green' ? 'border-l-green-500' :
+          position.color === 'amber' ? 'border-l-amber-500' :
+            'border-l-red-500'
     )}>
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -189,7 +189,7 @@ function CyclePositionBanner({
             基于 {indicators.length} 个核心指标综合判断 / Based on {indicators.length} core indicators
           </div>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
           <div className={cn(
             'px-3 sm:px-4 py-2 rounded-lg border',
@@ -348,20 +348,20 @@ function IndicatorCard({ indicator, onOpenEncyclopedia }: { indicator: Indicator
       {expanded && insight && (
         <div className="mb-2 sm:mb-4 p-2 sm:p-3 bg-blue-50 rounded-lg text-xs sm:text-sm">
           <div className="font-medium text-blue-900 mb-1">💡 投资含义 / Investment Insight</div>
-          <div className="text-blue-800 mb-2">{insight.summary}</div>
+          <div className="text-blue-800 mb-2">{insight.summary.zh || insight.summary.en}</div>
           <div className="grid grid-cols-2 gap-1 sm:gap-2 text-xs">
             <div>
               <span className="text-red-600">📉 股市 / Stocks：</span>
-              {insight.impactOnStocks}
+              {insight.impactOnStocks.zh || insight.impactOnStocks.en}
             </div>
             <div>
               <span className="text-blue-600">📊 债市 / Bonds：</span>
-              {insight.impactOnBonds}
+              {insight.impactOnBonds.zh || insight.impactOnBonds.en}
             </div>
           </div>
           <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-blue-200">
             <span className="font-medium text-blue-900">💼 建议 / Suggestion：</span>
-            <span className="text-blue-800">{insight.suggestion}</span>
+            <span className="text-blue-800">{insight.suggestion.zh || insight.suggestion.en}</span>
           </div>
         </div>
       )}

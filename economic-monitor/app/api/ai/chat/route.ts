@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth-options';
-import { generateAnalysis } from '@/lib/deepseek';
 import { INDICATORS } from '@/lib/fred';
 import { getInvestmentInsight, getIndicatorCategory } from '@/lib/volatility-analyzer';
 import { supabaseAdmin } from '@/lib/supabase';
@@ -95,8 +94,8 @@ async function generateSmartResponse(message: string, apiKey: string, lang: Loca
   // 1. 如果是问特定指标
   for (const [id, indicator] of Object.entries(INDICATORS)) {
     if (lowerMessage.includes(id.toLowerCase()) ||
-        lowerMessage.includes(indicator.title.toLowerCase()) ||
-        lowerMessage.includes(indicator.title.toLowerCase().replace(' ', '-'))) {
+      lowerMessage.includes(indicator.title.toLowerCase()) ||
+      lowerMessage.includes(indicator.title.toLowerCase().replace(' ', '-'))) {
 
       const insight = getInvestmentInsight(id);
       if (insight) {
@@ -109,7 +108,7 @@ async function generateSmartResponse(message: string, apiKey: string, lang: Loca
   const cycleKeywordsZh = ['周期', '宏观', '经济', '当前'];
   const cycleKeywordsEn = ['market cycle', 'economy', 'current economic', 'where are we'];
   if (cycleKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      cycleKeywordsEn.some(k => lowerMessage.includes(k))) {
+    cycleKeywordsEn.some(k => lowerMessage.includes(k))) {
     return generateCycleResponse(lang);
   }
 
@@ -117,7 +116,7 @@ async function generateSmartResponse(message: string, apiKey: string, lang: Loca
   const investKeywordsZh = ['投资', '应该', '买', '卖', '加仓', '减仓', '配置', '仓位'];
   const investKeywordsEn = ['advice', 'should', 'invest', 'buy', 'sell', 'portfolio', 'allocation'];
   if (investKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      investKeywordsEn.some(k => lowerMessage.includes(k))) {
+    investKeywordsEn.some(k => lowerMessage.includes(k))) {
     return generateInvestmentResponse(lang);
   }
 
@@ -125,7 +124,7 @@ async function generateSmartResponse(message: string, apiKey: string, lang: Loca
   const fedKeywordsZh = ['美联储', '加息', '降息', '利率', 'fed', 'rate hike', 'rate cut'];
   const fedKeywordsEn = ['fed', 'federal reserve', 'interest rate', 'rate hike', 'rate cut', 'monetary policy'];
   if (fedKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      fedKeywordsEn.some(k => lowerMessage.includes(k))) {
+    fedKeywordsEn.some(k => lowerMessage.includes(k))) {
     return generateFedResponse(lang);
   }
 
@@ -347,7 +346,7 @@ function generatePresetResponse(message: string, lang: Locale): string {
   // Check for indicator-specific questions
   for (const [id, indicator] of Object.entries(INDICATORS)) {
     if (lowerMessage.includes(id.toLowerCase()) ||
-        lowerMessage.includes(indicator.title.toLowerCase())) {
+      lowerMessage.includes(indicator.title.toLowerCase())) {
       const insight = getInvestmentInsight(id);
       if (insight) {
         return generateIndicatorResponse(id, indicator.title, insight, lang);
@@ -359,7 +358,7 @@ function generatePresetResponse(message: string, lang: Locale): string {
   const cycleKeywordsZh = ['周期', '宏观', '经济', '当前'];
   const cycleKeywordsEn = ['market cycle', 'economy', 'current economic'];
   if (cycleKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      cycleKeywordsEn.some(k => lowerMessage.includes(k))) {
+    cycleKeywordsEn.some(k => lowerMessage.includes(k))) {
     return generateCycleResponse(lang);
   }
 
@@ -367,7 +366,7 @@ function generatePresetResponse(message: string, lang: Locale): string {
   const investKeywordsZh = ['投资', '应该', '买', '卖', '配置', '仓位'];
   const investKeywordsEn = ['advice', 'should', 'invest', 'portfolio'];
   if (investKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      investKeywordsEn.some(k => lowerMessage.includes(k))) {
+    investKeywordsEn.some(k => lowerMessage.includes(k))) {
     return generateInvestmentResponse(lang);
   }
 
@@ -375,7 +374,7 @@ function generatePresetResponse(message: string, lang: Locale): string {
   const fedKeywordsZh = ['美联储', '加息', '降息', '利率'];
   const fedKeywordsEn = ['fed', 'federal reserve', 'interest rate'];
   if (fedKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      fedKeywordsEn.some(k => lowerMessage.includes(k))) {
+    fedKeywordsEn.some(k => lowerMessage.includes(k))) {
     return generateFedResponse(lang);
   }
 
@@ -383,7 +382,7 @@ function generatePresetResponse(message: string, lang: Locale): string {
   const whatIsKeywordsZh = ['什么是', '什么', '解释', '意思'];
   const whatIsKeywordsEn = ['what is', 'explain', 'what does'];
   if (whatIsKeywordsZh.some(k => lowerMessage.includes(k)) ||
-      whatIsKeywordsEn.some(k => lowerMessage.includes(k))) {
+    whatIsKeywordsEn.some(k => lowerMessage.includes(k))) {
     if (lang === 'zh') {
       return `您好！我是 Economic Monitor 的 AI 助手。
 

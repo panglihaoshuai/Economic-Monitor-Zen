@@ -10,11 +10,11 @@
 //    - 支持实时数据（WebSocket）
 //    - 支持国际指标
 
-import type { 
-  MacroIndicator, 
+import type {
+  MacroIndicator,
   MacroSignal,
   EconomicCycle,
-  ApiResponse 
+  ApiResponse
 } from '@/shared/types';
 
 // ============================================================================
@@ -37,54 +37,63 @@ export interface IMarketRepository {
   // -------------------------------------------------------------------------
   // 指标数据
   // -------------------------------------------------------------------------
-  
+
   /** 获取所有指标 */
   getAllIndicators(params?: IndicatorQueryParams): Promise<ApiResponse<MacroIndicator[]>>;
-  
+
   /** 根据ID获取指标 */
   getIndicatorById(id: string): Promise<ApiResponse<MacroIndicator | null>>;
-  
+
   /** 获取最新指标值 */
   getLatestValue(id: string): Promise<ApiResponse<number | null>>;
-  
+
   /** 获取历史数据 */
   getHistoricalData(
-    id: string, 
-    startDate: string, 
+    id: string,
+    startDate: string,
     endDate: string
   ): Promise<ApiResponse<number[]>>;
-  
+
   // -------------------------------------------------------------------------
   // 信号生成
   // -------------------------------------------------------------------------
-  
+
   /** 获取当前活跃信号 */
   getActiveSignals(): Promise<ApiResponse<MacroSignal[]>>;
-  
+
   /** 获取指标信号 */
   getIndicatorSignal(id: string): Promise<ApiResponse<MacroSignal | null>>;
-  
+
   // -------------------------------------------------------------------------
   // 经济周期
   // -------------------------------------------------------------------------
-  
+
   /** 获取当前经济周期 */
   getCurrentCycle(): Promise<ApiResponse<EconomicCycle>>;
-  
-   /** 获取周期历史 */
+
+  /** 获取周期历史 */
   getCycleHistory(
-    startDate: string, 
+    startDate: string,
     endDate: string
   ): Promise<ApiResponse<EconomicCycle[]>>;
 }
 // 仓储工厂
 // ============================================================================
 
-export type MarketRepositoryType = 'mock' | 'fred' | 'api';
+export type MarketRepositoryType = 'mock' | 'supabase' | 'fred' | 'api';
 
 /** 获取仓储实例 */
-export function getMarketRepository(type: MarketRepositoryType = 'mock'): IMarketRepository {
-  switch (type) {
+export function getMarketRepository(type?: MarketRepositoryType): IMarketRepository {
+  // 从环境变量或参数确定仓库类型
+  const repositoryType = type || (process.env.NEXT_PUBLIC_REPOSITORY_TYPE as MarketRepositoryType) || 'mock';
+
+  switch (repositoryType) {
+    case 'supabase': {
+      // 动态导入以避免服务端/客户端问题
+      const { createSupabaseMarketRepository } = require('@/infrastructure/supabase/SupabaseMarket.repository');
+      const { supabase } = require('@/lib/supabase');
+      return createSupabaseMarketRepository(supabase);
+    }
     case 'fred':
       // TODO: 实现 FRED API 仓储
       throw new Error('FRED repository not implemented yet');
@@ -101,11 +110,11 @@ export function getMarketRepository(type: MarketRepositoryType = 'mock'): IMarke
 // Mock 仓储实现
 // ============================================================================
 
-import { 
-  INDICATOR_CONFIGS, 
-  createMacroIndicator, 
+import {
+  INDICATOR_CONFIGS,
+  createMacroIndicator,
   createMacroSignal,
-  determineEconomicCycle 
+  determineEconomicCycle
 } from '../entities/MacroIndicator.entity';
 
 // 模拟数据
@@ -120,7 +129,7 @@ function createMockMarketRepository(): IMarketRepository {
   return {
     async getAllIndicators(params?: IndicatorQueryParams): Promise<ApiResponse<MacroIndicator[]>> {
       let result = [...mockIndicators];
-      
+
       if (params?.ids?.length) {
         result = result.filter(i => params.ids!.includes(i.id));
       }
@@ -130,63 +139,63 @@ function createMockMarketRepository(): IMarketRepository {
       if (params?.status?.length) {
         result = result.filter(i => params.status!.includes(i.status));
       }
-      
+
       return { success: true, data: result };
     },
-    
+
     async getIndicatorById(id: string): Promise<ApiResponse<MacroIndicator | null>> {
       const indicator = mockIndicators.find(i => i.id === id) || null;
       return { success: true, data: indicator };
     },
-    
+
     async getLatestValue(id: string): Promise<ApiResponse<number | null>> {
       const indicator = mockIndicators.find(i => i.id === id);
       return { success: true, data: indicator?.value || null };
     },
-    
+
     async getHistoricalData(
-      id: string, 
-      startDate: string, 
+      id: string,
+      startDate: string,
       endDate: string
     ): Promise<ApiResponse<number[]>> {
       // TODO: 返回模拟历史数据
       return { success: true, data: [] };
     },
-    
+
     async getActiveSignals(): Promise<ApiResponse<MacroSignal[]>> {
       const signals = mockIndicators
         .filter(i => i.status !== 'normal')
         .map(createMacroSignal);
-      
+
       return { success: true, data: signals };
     },
-    
+
     async getIndicatorSignal(id: string): Promise<ApiResponse<MacroSignal | null>> {
       const indicator = mockIndicators.find(i => i.id === id);
       if (!indicator) return { success: true, data: null };
-      
+
       const signal = createMacroSignal(indicator);
       return { success: true, data: signal };
     },
-    
+
     async getCurrentCycle(): Promise<ApiResponse<EconomicCycle>> {
       const gdp = mockIndicators.find(i => i.id === 'GDP');
       const unrate = mockIndicators.find(i => i.id === 'UNRATE');
       const sofr = mockIndicators.find(i => i.id === 'SOFR');
       const pce = mockIndicators.find(i => i.id === 'PCE');
-      
+
       const cycle = determineEconomicCycle({
         gdpTrend: gdp?.value || 2,
         unemploymentRate: unrate?.value || 4,
         interestRateLevel: sofr?.value || 5,
         inflationLevel: pce?.value || 2.5,
       });
-      
+
       return { success: true, data: cycle };
     },
-    
+
     async getCycleHistory(
-      startDate: string, 
+      startDate: string,
       endDate: string
     ): Promise<ApiResponse<EconomicCycle[]>> {
       // TODO: 返回周期历史

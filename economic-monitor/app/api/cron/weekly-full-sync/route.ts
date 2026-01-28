@@ -15,12 +15,12 @@ export async function GET(request: Request) {
 
   try {
     console.log('[Weekly Sync] Starting weekly full data synchronization...');
-    
+
     // 导入fullSync函数
     const { fullSync } = await import('../../../../lib/improved-scheduler');
-    
+
     const startTime = Date.now();
-    
+
     // 执行全量同步
     const results = await fullSync(undefined, {
       validateData: true,
@@ -29,23 +29,23 @@ export async function GET(request: Request) {
       maxRetries: 3,
       retryDelay: 1000,
     });
-    
+
     const endTime = Date.now();
     const duration = endTime - startTime;
-    
+
     // 统计结果
     let totalFetched = 0;
     let totalInserted = 0;
     let totalErrors = 0;
     let successCount = 0;
-    
+
     for (const result of results) {
       totalFetched += result.observationsFetched;
       totalInserted += result.observationsInserted;
       totalErrors += result.errors.length;
       if (result.success) successCount++;
     }
-    
+
     // 记录到collection_runs表
     const { error: logError } = await supabaseAdmin
       .from('collection_runs')
@@ -61,15 +61,15 @@ export async function GET(request: Request) {
         total_inserted: totalInserted,
         total_errors: totalErrors,
       });
-    
+
     if (logError) {
       console.error('[Weekly Sync] Failed to log run:', logError);
     }
-    
+
     console.log(`[Weekly Sync] Completed in ${Math.round(duration / 1000)}s`);
     console.log(`[Weekly Sync] Success: ${successCount}/${results.length} indicators`);
     console.log(`[Weekly Sync] Fetched: ${totalFetched}, Inserted: ${totalInserted}, Errors: ${totalErrors}`);
-    
+
     return NextResponse.json({
       success: true,
       type: 'weekly_full_sync',
@@ -83,14 +83,14 @@ export async function GET(request: Request) {
       },
       status: totalErrors === 0 ? 'success' : 'success_with_errors',
     });
-    
+
   } catch (error) {
     console.error('[Weekly Sync] Full sync failed:', error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Weekly full sync failed',
-        details: (error as Error).message 
+        details: (error as Error).message
       },
       { status: 500 }
     );

@@ -69,7 +69,7 @@ class EnhancedDataSync {
     });
 
     this.runId = `sync_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // 初始化限速器 (120 requests/minute)
     this.rateLimiter = {
       tokens: 120,
@@ -98,7 +98,7 @@ class EnhancedDataSync {
   } = {}) {
     console.log('🚀 开始增强版全量数据同步');
     console.log(`🆔 运行ID: ${this.runId}`);
-    
+
     try {
       // 1. 检查是否有断点可以恢复
       let resumeData: SyncCheckpoint | null = null;
@@ -112,7 +112,7 @@ class EnhancedDataSync {
       // 2. 获取所有指标
       const indicators = getAllIndicators();
       this.progress.totalIndicators = indicators.length;
-      
+
       // 3. 估算总数据点数量（用于进度显示）
       const totalDataPoints = await this.estimateTotalDataPoints(indicators, resumeData);
       this.progress.totalDataPoints = totalDataPoints;
@@ -127,7 +127,7 @@ class EnhancedDataSync {
 
         // 检查是否已有检查点
         const existingCheckpoint = this.checkpoints.get(indicator.id);
-        
+
         try {
           // 根据检查点决定采集策略
           const fetchResult = await this.syncIndicator(
@@ -185,18 +185,18 @@ class EnhancedDataSync {
     overwriteExisting: boolean
   ): Promise<EnhancedFetchResult> {
     const startTime = Date.now();
-    
+
     try {
       // 1. 确定数据范围
       const dateRange = this.calculateDateRange(indicator, existingCheckpoint);
-      
+
       console.log(`\n🔄 正在同步: ${indicator.id} (${indicator.title})`);
       console.log(`📅 数据范围: ${dateRange.startDate} 至 ${dateRange.endDate}`);
-      
+
       // 2. 带限速的 FRED 数据获取
       this.progress.currentStage = 'fetching';
       const fredData = await this.fetchWithRateLimiting(indicator, dateRange);
-      
+
       if (!fredData.observations || fredData.observations.length === 0) {
         return {
           success: false,
@@ -213,14 +213,14 @@ class EnhancedDataSync {
       // 3. 数据转换和质量检查
       this.progress.currentStage = 'transforming';
       const transformedData = await this.transformData(indicator, fredData, overwriteExisting);
-      
+
       // 4. 检测缺失数据
       const missingDates = this.detectMissingDates(transformedData, indicator);
-      
+
       // 5. 带限速的批量插入
       this.progress.currentStage = 'inserting';
       const insertResult = await this.batchInsertWithRateLimiting(transformedData);
-      
+
       // 6. 数据验证
       this.progress.currentStage = 'validating';
       await this.validateInsertedData(indicator, transformedData);
@@ -256,9 +256,9 @@ class EnhancedDataSync {
 
   private async fetchWithRateLimiting(indicator: any, dateRange: any): Promise<any> {
     console.log('⏳ 开始数据获取 (带智能限速)...');
-    
+
     const result = await fetchFREDData(indicator.id, dateRange.startDate);
-    
+
     // 如果遇到 429，智能等待
     if (result.status === 429) {
       const waitTime = this.calculateBackoffTime(1);
@@ -266,13 +266,13 @@ class EnhancedDataSync {
       await new Promise(resolve => setTimeout(resolve, waitTime));
       return this.fetchWithRateLimiting(indicator, dateRange); // 递归重试
     }
-    
+
     return result;
   }
 
   private async batchInsertWithRateLimiting(data: any[]): Promise<any> {
     console.log(`💾 开始批量插入 ${data.length} 条记录...`);
-    
+
     try {
       const result = await batchInsertEconomicData(this.supabase, data, {
         batchSize: 1000,
@@ -281,10 +281,10 @@ class EnhancedDataSync {
           this.progress.completedDataPoints += processed - (this.progress.completedDataPoints % total);
         }
       });
-      
+
       console.log(`✅ 批量插入完成: ${result.inserted} 插入, ${result.skipped} 跳过`);
       return result;
-      
+
     } catch (error) {
       console.error('❌ 批量插入失败:', error);
       throw error;
@@ -301,25 +301,25 @@ class EnhancedDataSync {
       (this.progress.completedDataPoints / this.progress.totalDataPoints) * 100,
       100
     );
-    
+
     const completed = this.progress.completedIndicators;
     const total = this.progress.totalIndicators;
     const currentIndicator = this.progress.currentIndicator;
     const stage = this.getStageEmoji(this.progress.currentStage);
-    
+
     // ETA 计算
     const elapsedMs = Date.now() - this.progress.startTime;
     const rate = this.progress.completedDataPoints / (elapsedMs / 1000 / 60); // per minute
     const remaining = this.progress.totalDataPoints - this.progress.completedDataPoints;
     const etaMinutes = rate > 0 ? Math.ceil(remaining / rate) : undefined;
-    
+
     this.progress.etaMinutes = etaMinutes;
-    
+
     // 进度条显示
     const barLength = 40;
     const filledLength = Math.round((percentage / 100) * barLength);
     const bar = '█'.repeat(filledLength) + '░'.repeat(barLength - filledLength);
-    
+
     process.stdout.write(`\r${stage} [${bar}] ${percentage.toFixed(1)}% | ${completed}/${total} | 当前: ${currentIndicator} | ETA: ${etaMinutes ? `${etaMinutes}min` : '计算中...'}`);
   }
 
@@ -344,7 +344,7 @@ class EnhancedDataSync {
         .eq('status', 'active')
         .order('updated_at', { ascending: false })
         .limit(1);
-        
+
       return data?.[0] || null;
     } catch (error) {
       console.warn('⚠️ 无法加载检查点:', error);
@@ -365,12 +365,12 @@ class EnhancedDataSync {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
+
       await this.supabase
         .from('sync_checkpoints')
         .upsert(checkpoint)
         .eq('id', checkpoint.id);
-        
+
       this.checkpoints.set(seriesId, checkpoint);
     } catch (error) {
       console.warn('⚠️ 无法保存检查点:', error);
@@ -382,18 +382,18 @@ class EnhancedDataSync {
   private detectMissingDates(data: any[], indicator: any): string[] {
     const dates = data.map(d => d.date).sort();
     const missing: string[] = [];
-    
+
     for (let i = 1; i < dates.length; i++) {
       const current = new Date(dates[i]);
       const previous = new Date(dates[i - 1]);
       const expectedDiff = this.getExpectedFrequency(indicator);
       const actualDiff = (current.getTime() - previous.getTime()) / (1000 * 60 * 60 * 24);
-      
+
       if (actualDiff > expectedDiff * 1.5) { // 超过预期1.5倍算缺失
         missing.push(dates[i - 1]); // 之前的一天可能有数据缺失
       }
     }
-    
+
     return missing;
   }
 
@@ -404,7 +404,7 @@ class EnhancedDataSync {
       'Monthly': 30,
       'Quarterly': 90,
     };
-    
+
     return frequencyDays[indicator.frequency] || 1;
   }
 
@@ -419,11 +419,11 @@ class EnhancedDataSync {
         endDate: new Date().toISOString().split('T')[0],
       };
     }
-    
+
     // 否则获取5年历史数据
     const startDate = new Date();
     startDate.setFullYear(startDate.getFullYear() - 5);
-    
+
     return {
       startDate: startDate.toISOString().split('T')[0],
       endDate: new Date().toISOString().split('T')[0],
@@ -456,7 +456,7 @@ class EnhancedDataSync {
         .select('*', { count: 'exact', head: true })
         .eq('series_id', indicator.id)
         .gte('date', '2020-01-01');
-      
+
       console.log(`✅ 验证 ${indicator.id}: 数据库中现在有 ${count} 条记录`);
     } catch (error) {
       console.warn(`⚠️ 验证失败: ${indicator.id}:`, error);
@@ -465,21 +465,21 @@ class EnhancedDataSync {
 
   private async finalSyncValidation(): Promise<void> {
     console.log('\n🔍 最终验证中...');
-    
+
     // 检查总数据量
     const { count } = await this.supabase
       .from('economic_data')
       .select('*', { count: 'exact', head: true });
-    
+
     console.log(`✅ 数据库总记录: ${count}`);
-    
+
     // 清理旧的检查点
     await this.supabase
       .from('sync_checkpoints')
       .delete()
       .lt('updated_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .eq('runId', this.runId);
-    
+
     console.log('✅ 清理旧检查点完成');
   }
 
