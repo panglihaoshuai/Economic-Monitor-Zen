@@ -6,6 +6,7 @@ import { ZenCard, ZenBadge, ZenButton, ZenSpinner } from './ui/ZenUI';
 import { ZenSparkline } from './ui/ZenSparkline';
 import { ArrowUpRight, ArrowDownRight, AlertTriangle, Info, RefreshCw } from 'lucide-react';
 import { useLanguage } from '@/lib/language-context';
+import { IndicatorDetailModal } from './IndicatorDetailModal';
 
 // ========== Types ==========
 
@@ -60,7 +61,12 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 // ========== Sub-component: Indicator Card ==========
 
-function IndicatorCard({ indicator }: { indicator: IndicatorSummary }) {
+interface IndicatorCardProps {
+    indicator: IndicatorSummary;
+    onClick: () => void;
+}
+
+function IndicatorCard({ indicator, onClick }: IndicatorCardProps) {
     const { t, language } = useLanguage();
     // Fetch history for sparkline
     const { data: historyData } = useSWR<{ data: { value: number }[] }>(
@@ -86,15 +92,16 @@ function IndicatorCard({ indicator }: { indicator: IndicatorSummary }) {
             : '';
 
     const bgStyle = isCritical
-        ? { backgroundColor: 'rgba(176, 85, 85, 0.05)' } // #B05555 at 5%
+        ? { backgroundColor: 'rgba(176, 85, 85, 0.05)' }
         : isWarning
-            ? { backgroundColor: 'rgba(212, 132, 94, 0.05)' } // #D4845E at 5%
+            ? { backgroundColor: 'rgba(212, 132, 94, 0.05)' }
             : undefined;
 
     return (
         <ZenCard
-            className={`flex flex-col gap-4 h-full ${borderColorClass}`}
+            className={`flex flex-col gap-4 h-full ${borderColorClass} cursor-pointer hover:shadow-lg hover:border-[var(--accent-sage)] transition-all duration-200`}
             style={bgStyle}
+            onClick={onClick}
         >
             {/* Header */}
             <div className="flex justify-between items-start">
@@ -166,6 +173,9 @@ export function RealEconomicDashboard() {
     const { data, error, isLoading, mutate } = useSWR<DashboardResponse>('/api/data', fetcher);
     const { t, language } = useLanguage();
 
+    // Modal state
+    const [selectedIndicator, setSelectedIndicator] = useState<{ id: string; title: string } | null>(null);
+
     if (error) return (
         <div className="p-10 text-center text-[var(--status-error)]">
             {t('zen.dashboard.error')}
@@ -200,55 +210,86 @@ export function RealEconomicDashboard() {
         ? (language === 'zh' ? '异常检测' : 'Anomaly Detection')
         : (language === 'zh' ? '标准分析' : 'Standard Analysis');
 
-    return (
-        <div className="space-y-12 animate-fade-in">
-            {/* Header */}
-            <header className="flex justify-between items-end pb-6 border-b border-[var(--stroke-light)]">
-                <div>
-                    <h1 className="text-3xl font-serif text-[var(--text-primary)]">{t('zen.dashboard.title')}</h1>
-                    <p className="text-[var(--text-secondary)] mt-2 max-w-xl">
-                        {t('zen.dashboard.subtitle', {
-                            count: data.summary.totalIndicators,
-                            method: methodLabel
-                        })}
-                    </p>
-                </div>
-                <ZenButton variant="ghost" size="sm" onClick={() => mutate()} className="gap-2">
-                    <RefreshCw className="w-4 h-4" />
-                    {t('zen.dashboard.refresh')}
-                </ZenButton>
-            </header>
+    const handleIndicatorClick = (indicator: IndicatorSummary) => {
+        setSelectedIndicator({ id: indicator.id, title: indicator.title });
+    };
 
-            {/* Critical Section */}
-            {(criticalIndicators.length > 0 || warningIndicators.length > 0) && (
+    return (
+        <>
+            <div className="space-y-12 animate-fade-in">
+                {/* Header */}
+                <header className="flex justify-between items-end pb-6 border-b border-[var(--stroke-light)]">
+                    <div>
+                        <h1 className="text-3xl font-serif text-[var(--text-primary)]">{t('zen.dashboard.title')}</h1>
+                        <p className="text-[var(--text-secondary)] mt-2 max-w-xl">
+                            {t('zen.dashboard.subtitle', {
+                                count: data.summary.totalIndicators,
+                                method: methodLabel
+                            })}
+                        </p>
+                    </div>
+                    <ZenButton variant="ghost" size="sm" onClick={() => mutate()} className="gap-2">
+                        <RefreshCw className="w-4 h-4" />
+                        {t('zen.dashboard.refresh')}
+                    </ZenButton>
+                </header>
+
+                {/* Critical Section */}
+                {(criticalIndicators.length > 0 || warningIndicators.length > 0) && (
+                    <section className="space-y-6">
+                        <div className="flex items-center gap-2">
+                            <h2 className="text-sm font-semibold uppercase tracking-widest text-[var(--status-warning)]">
+                                {t('zen.dashboard.anomalies')} ({criticalIndicators.length + warningIndicators.length})
+                            </h2>
+                            <div className="h-px bg-[var(--status-warning)]/20 flex-1" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {criticalIndicators.map(ind => (
+                                <IndicatorCard
+                                    key={ind.id}
+                                    indicator={ind}
+                                    onClick={() => handleIndicatorClick(ind)}
+                                />
+                            ))}
+                            {warningIndicators.map(ind => (
+                                <IndicatorCard
+                                    key={ind.id}
+                                    indicator={ind}
+                                    onClick={() => handleIndicatorClick(ind)}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* Main Grid */}
                 <section className="space-y-6">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-sm font-semibold uppercase tracking-widest text-[var(--status-warning)]">
-                            {t('zen.dashboard.anomalies')} ({criticalIndicators.length + warningIndicators.length})
+                        <h2 className="text-sm font-semibold uppercase tracking-widest text-[var(--text-muted)]">
+                            {t('zen.dashboard.marketOverview')}
                         </h2>
-                        <div className="h-px bg-[var(--status-warning)]/20 flex-1" />
+                        <div className="h-px bg-[var(--stroke-light)] flex-1" />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {criticalIndicators.map(ind => <IndicatorCard key={ind.id} indicator={ind} />)}
-                        {warningIndicators.map(ind => <IndicatorCard key={ind.id} indicator={ind} />)}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {sortedNormal.map(ind => (
+                            <IndicatorCard
+                                key={ind.id}
+                                indicator={ind}
+                                onClick={() => handleIndicatorClick(ind)}
+                            />
+                        ))}
                     </div>
                 </section>
-            )}
+            </div>
 
-            {/* Main Grid */}
-            <section className="space-y-6">
-                <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold uppercase tracking-widest text-[var(--text-muted)]">
-                        {t('zen.dashboard.marketOverview')}
-                    </h2>
-                    <div className="h-px bg-[var(--stroke-light)] flex-1" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {sortedNormal.map(ind => (
-                        <IndicatorCard key={ind.id} indicator={ind} />
-                    ))}
-                </div>
-            </section>
-        </div>
+            {/* Detail Modal */}
+            {selectedIndicator && (
+                <IndicatorDetailModal
+                    indicatorId={selectedIndicator.id}
+                    indicatorTitle={selectedIndicator.title}
+                    onClose={() => setSelectedIndicator(null)}
+                />
+            )}
+        </>
     );
 }
