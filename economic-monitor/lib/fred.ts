@@ -17,6 +17,7 @@ export interface FREDSeriesInfo {
   units: string;
   description: string;
   analyzer: AnalyzerType;  // 使用 GARCH 还是 Z-Score 分析
+  deprecated?: boolean;  // 是否已弃用
 }
 
 // ========== 指标分类 ==========
@@ -69,6 +70,7 @@ export const INDICATORS: Record<string, FREDSeriesInfo> = {
     units: 'Percent',
     description: 'TED Spread is the difference between the 3-month LIBOR and the 3-month Treasury bill rate. A key indicator of credit risk.',
     analyzer: 'garch',
+    deprecated: true,  // 已弃用：FRED API在2022年后停止更新
   },
   // ========== Z-Score 指标（实体经济） ==========
   GDPC1: {
@@ -159,7 +161,7 @@ export async function fetchFREDData(
   });
 
   const response = await fetch(`${url}?${params}`);
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`FRED API error for ${seriesId}: ${response.status} - ${errorText}`);
@@ -177,7 +179,7 @@ export async function fetchMultipleIndicators(
   const observationStart = startDate.toISOString().split('T')[0];
 
   const results = new Map<string, FREDSeries>();
-  
+
   // Fetch all indicators in parallel with rate limiting
   const fetchPromises = seriesIds.map(async (seriesId) => {
     try {

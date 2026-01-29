@@ -6,11 +6,16 @@ import { getAllIndicators, getIndicatorInfo } from '../lib/fred';
 import { analyzeDataGaps, type GapAnalysisReport } from '../lib/smart-data-scheduler';
 
 // 初始化Supabase客户端
+import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 if (!supabaseUrl || !supabaseServiceKey) {
     console.error('❌ 错误: 缺少Supabase环境变量');
+    console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '已设置' : '未设置');
+    console.error('SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '已设置' : '未设置');
     process.exit(1);
 }
 
