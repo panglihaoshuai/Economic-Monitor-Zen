@@ -17,6 +17,15 @@
 - **次要指标**: 美元指数、标普500
 - **参考指标**: M2货币供应量、新屋开工（弱化显示）
 
+### 高级统计分析
+- **动态统计计算**: 基于用户选择的时间范围自动重新计算所有统计指标
+- **Z-Score异常检测**: 使用完整时间范围数据进行标准化异常检测
+- **GARCH波动率模型**: 高级波动率预测和条件波动率计算
+- **波动率趋势分析**: 滚动窗口波动率计算、突破点检测、波动率聚类
+- **语义洞察引擎**: 上下文感知的智能洞察生成，提供趋势、波动率、变化分析
+- **跨资产相关性分析**: Pearson相关系数计算、统计显著性检验、相关性矩阵
+- **自适应数据粒度**: 根据时间范围自动调整数据粒度（日/周/月/季度）
+
 ### 交易记录
 - **统计概览**: 总交易数、已完成、待处理、总交易额
 - **筛选功能**: 全部/买入/卖出快速切换
@@ -51,6 +60,12 @@ NEXTAUTH_SECRET=your_nextauth_secret_here
 - **字体**: Noto Sans SC + Inter
 - **部署**: Vercel自动部署
 - **数据**: FRED API + SQLite本地存储
+- **统计分析**: 
+  - 独立统计计算模块（均值、标准差、Z-Score）
+  - GARCH(1,1)波动率模型
+  - Pearson相关系数计算
+  - 统计显著性检验（t-test）
+- **架构**: 模块化设计，完全解耦
 
 ## 📝 API Endpoints
 
@@ -59,6 +74,15 @@ NEXTAUTH_SECRET=your_nextauth_secret_here
 POST /api/cron/fetch-data     # 定时获取数据
 POST /api/cron/weekly-full-sync  # 周全量同步
 GET  /api/data                 # 获取经济数据
+```
+
+### 高级统计分析
+```
+GET  /api/economic-data        # 经济数据（含动态统计计算）
+GET  /api/volatility-analysis  # 波动率分析（趋势、突破、聚类）
+GET  /api/semantic-analysis    # 语义洞察分析（上下文感知）
+GET  /api/correlation-analysis # 跨资产相关性分析
+GET  /api/adaptive-granularity # 自适应数据粒度调整
 ```
 
 ### 用户功能

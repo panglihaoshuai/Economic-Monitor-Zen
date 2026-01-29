@@ -2,6 +2,13 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { INDICATORS, getAllIndicators } from '@/lib/fred';
 import { detectAnomalies } from '@/lib/anomaly-detector';
+import {
+    calculateStatistics,
+    calculateZScore,
+    calculateDataPointZScores,
+    type DataPoint,
+    type StatisticsResult
+} from '@/lib/statistics-calculator';
 
 export async function GET(request: Request) {
     try {
@@ -46,29 +53,27 @@ export async function GET(request: Request) {
             // For anomaly detection, we need descending order
             const dataDesc = [...data].reverse();
 
-            // 检测异常
+            // 转换为DataPoint格式
+            const dataPoints: DataPoint[] = data.map(d => ({
+                date: d.date,
+                value: d.value
+            }));
+
+            // 使用新的统计计算模块 - 基于完整的时间范围
+            const statistics: StatisticsResult = calculateStatistics(dataPoints);
+
+            // 检测异常 - 使用完整的时间范围数据
             const anomalyResult = await detectAnomalies(seriesId, dataDesc);
 
             const indicator = INDICATORS[seriesId] || { title: seriesId, category: 'unknown' };
 
-            // Calculate statistics for the period
-            const values = data.map(d => d.value);
-            const mean = values.reduce((a, b) => a + b, 0) / values.length;
-            const stdDev = Math.sqrt(values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length);
-            const min = Math.min(...values);
-            const max = Math.max(...values);
+            // 计算当前值的Z分数 - 基于完整时间范围的统计
+            const historicalValues = dataPoints.slice(0, -1).map(d => d.value); // 排除当前值
             const currentValue = dataDesc[0]?.value || 0;
-            const zScore = stdDev > 0 ? (currentValue - mean) / stdDev : 0;
+            const zScoreResult = calculateZScore(currentValue, historicalValues);
 
-            // Calculate per-point Z-scores for coloring
-            const dataWithZScore = data.map(d => {
-                const pointZScore = stdDev > 0 ? (d.value - mean) / stdDev : 0;
-                return {
-                    ...d,
-                    zScore: pointZScore,
-                    severity: Math.abs(pointZScore) >= 3 ? 'critical' : Math.abs(pointZScore) >= 2 ? 'warning' : 'normal'
-                };
-            });
+            // Calculate per-point Z-scores for coloring - 基于时间范围的统计
+            const dataWithZScore = calculateDataPointZScores(dataPoints, statistics);
 
             return NextResponse.json({
                 series: indicator,
@@ -79,15 +84,15 @@ export async function GET(request: Request) {
                 },
                 anomaly: anomalyResult,
                 statistics: {
-                    mean: mean,
-                    stdDev: stdDev,
-                    min: min,
-                    max: max,
+                    mean: statistics.mean,
+                    stdDev: statistics.stdDev,
+                    min: statistics.min,
+                    max: statistics.max,
                     currentValue: currentValue,
-                    zScore: zScore,
-                    dataPoints: data.length,
-                    startDate: data[0]?.date,
-                    endDate: data[data.length - 1]?.date,
+                    zScore: zScoreResult.zScore,
+                    dataPoints: statistics.dataPoints,
+                    startDate: statistics.startDate,
+                    endDate: statistics.endDate,
                 }
             });
         }
