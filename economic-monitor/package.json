@@ -11,7 +11,9 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
-    "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/database.types.ts"
+    "db:generate": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > lib/database.types.ts",
+    "data:check-gaps": "npx ts-node scripts/check-data-gaps.ts",
+    "data:full-sync": "npx ts-node scripts/local-full-sync.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
