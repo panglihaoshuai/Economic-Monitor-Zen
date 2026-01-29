@@ -112,7 +112,7 @@ const FETCH_CONFIGS: Record<DataFrequency, FetchConfig> = {
 export function getFrequency(seriesId: string): DataFrequency {
   const info = INDICATORS[seriesId];
   if (!info) return 'daily';
-  
+
   const freq = info.frequency.toLowerCase();
   if (freq.includes('quarter')) return 'quarterly';
   if (freq.includes('week')) return 'weekly';
@@ -154,10 +154,10 @@ export function generateExpectedDates(
 ): string[] {
   const dates: string[] = [];
   const current = new Date(startDate);
-  
+
   while (current <= endDate) {
     dates.push(current.toISOString().split('T')[0]);
-    
+
     switch (frequency) {
       case 'daily':
         current.setDate(current.getDate() + 1);
@@ -173,7 +173,7 @@ export function generateExpectedDates(
         break;
     }
   }
-  
+
   return dates;
 }
 
@@ -193,7 +193,7 @@ export async function smartFetchWithLogging(
 ): Promise<CollectionRun> {
   const runId = generateRunId();
   const startTime = Date.now();
-  
+
   // 创建运行记录
   const run: CollectionRun = {
     runId,
@@ -216,7 +216,7 @@ export async function smartFetchWithLogging(
 
     // 确定要采集的指标
     let indicators: FREDSeriesInfo[] = [];
-    
+
     if (options.seriesIds && options.seriesIds.length > 0) {
       indicators = options.seriesIds
         .map(id => INDICATORS[id])
@@ -227,7 +227,7 @@ export async function smartFetchWithLogging(
     } else {
       indicators = getAllIndicators();
     }
-    
+
     run.totalIndicators = indicators.length;
 
     // 按频率分组处理
@@ -236,29 +236,29 @@ export async function smartFetchWithLogging(
 
     for (const freq of (Object.keys(byFreq) as DataFrequency[])) {
       const freqIndicators = byFreq[freq];
-      
+
       if (options.frequency && options.frequency !== freq) continue;
-      
+
       // 如果指定了 seriesIds，只处理匹配的
       const filteredIndicators = options.seriesIds
         ? freqIndicators.filter(i => options.seriesIds!.includes(i.id))
         : freqIndicators;
-      
+
       if (filteredIndicators.length === 0 && options.seriesIds) continue;
-      
+
       const config = FETCH_CONFIGS[freq];
-      
+
       // 并发处理（限制并发数）
       const batchSize = 3;  // 每次最多3个并发
       for (let i = 0; i < filteredIndicators.length; i += batchSize) {
         const batch = filteredIndicators.slice(i, i + batchSize);
         const batchResults = await Promise.all(
-          batch.map(indicator => 
+          batch.map(indicator =>
             fetchWithLogging(supabase, indicator.id, apiKey, config, options.forceFullSync)
           )
         );
         allResults.push(...batchResults);
-        
+
         // 限速
         await sleep(config.rateLimitDelay * batch.length);
       }
@@ -270,7 +270,7 @@ export async function smartFetchWithLogging(
     run.totalInserted = allResults.reduce((sum, r) => sum + r.inserted, 0);
     run.totalSkipped = allResults.reduce((sum, r) => sum + r.skipped, 0);
     run.totalErrors = allResults.filter(r => !r.success).length;
-    
+
     // 构建错误汇总
     for (const result of allResults) {
       if (result.errors.length > 0) {
@@ -278,8 +278,8 @@ export async function smartFetchWithLogging(
       }
     }
 
-    run.status = run.totalErrors === 0 ? 'completed' : 
-                 run.totalErrors < run.totalIndicators / 2 ? 'partial' : 'failed';
+    run.status = run.totalErrors === 0 ? 'completed' :
+      run.totalErrors < run.totalIndicators / 2 ? 'partial' : 'failed';
 
   } catch (error) {
     run.status = 'failed';
@@ -287,7 +287,7 @@ export async function smartFetchWithLogging(
   } finally {
     run.completedAt = new Date();
     run.durationMs = Date.now() - startTime;
-    
+
     // 记录运行完成
     await logRunComplete(supabase, run);
   }
@@ -320,10 +320,10 @@ async function fetchWithLogging(
 
   // 计算获取窗口
   let observationStart: Date;
-  
+
   if (forceFullSync) {
     observationStart = new Date();
-    observationStart.setFullYear(observationStart.getFullYear() - 5);
+    observationStart.setFullYear(observationStart.getFullYear() - 10); // 获取10年数据
   } else {
     const lastRecord = await getLatestRecord(supabase, seriesId);
     if (lastRecord) {
@@ -340,7 +340,7 @@ async function fetchWithLogging(
     try {
       const data = await fetchFREDSeries(seriesId, apiKey, observationStart);
       result.fetched = data.observations.length;
-      
+
       // 检测缺失日期
       const expectedDates = generateExpectedDates(
         observationStart,
@@ -349,7 +349,7 @@ async function fetchWithLogging(
       );
       const existingDates = data.observations.map((o: { date: string }) => o.date);
       result.missingDates = findMissingDates(existingDates, expectedDates);
-      
+
       // 批量插入数据
       const records = data.observations
         .filter((obs: { value: string }) => obs.value && obs.value !== '.' && obs.value !== '-')
@@ -375,11 +375,11 @@ async function fetchWithLogging(
       result.skipped = data.observations.length - records.length;
       result.success = result.errors.length === 0;
       break;
-      
+
     } catch (error) {
       const errorMsg = `Attempt ${attempt} failed: ${error instanceof Error ? error.message : 'Unknown error'}`;
       result.errors.push(errorMsg);
-      
+
       if (attempt < config.retryAttempts) {
         await sleep(config.retryDelay * attempt);
       }
@@ -533,7 +533,7 @@ export async function getSchedulerStats(supabase: any): Promise<SchedulerStats> 
 
   const dataFreshness = getAllIndicators().map(ind => {
     const lastUpdate = freshnessMap.get(ind.id);
-    const daysAgo = lastUpdate 
+    const daysAgo = lastUpdate
       ? Math.floor((Date.now() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24))
       : -1;
 
@@ -544,7 +544,7 @@ export async function getSchedulerStats(supabase: any): Promise<SchedulerStats> 
       const freq = getFrequency(ind.id);
       const thresholds = { daily: 3, weekly: 10, monthly: 45, quarterly: 120 };
       const threshold = thresholds[freq];
-      
+
       if (daysAgo > threshold) status = 'stale';
       else if (daysAgo > threshold / 2) status = 'warning';
     }
@@ -605,11 +605,11 @@ function calculateNextRunTime(): string {
   // 每天早上 8:00 UTC
   const next = new Date(now);
   next.setUTCHours(8, 0, 0, 0);
-  
+
   if (next <= now) {
     next.setDate(next.getDate() + 1);
   }
-  
+
   return next.toISOString();
 }
 
@@ -639,12 +639,12 @@ async function fetchFREDSeries(
   });
 
   const response = await fetch(`${url}?${params}`);
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`FRED API error ${response.status}: ${errorText}`);
   }
-  
+
   return response.json();
 }
 
@@ -656,6 +656,6 @@ async function getLatestRecord(supabase: any, seriesId: string): Promise<any> {
     .order('date', { ascending: false })
     .limit(1)
     .single();
-  
+
   return data;
 }

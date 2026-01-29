@@ -75,7 +75,21 @@
     "selectAll": "全选",
     "deselectAll": "取消全选",
     "lastUpdated": "上次更新",
-    "noData": "暂无数据"
+    "noData": "暂无数据",
+    "SOFR": "有担保隔夜融资利率",
+    "DGS2": "2年期国债收益率",
+    "DGS10": "10年期国债收益率",
+    "MORTGAGE30US": "30年期固定抵押贷款利率",
+    "TEDRATE": "TED利差",
+    "GDPC1": "实际国内生产总值",
+    "UNRATE": "失业率",
+    "PCEPI": "个人消费支出价格指数",
+    "PCE": "个人消费支出",
+    "RSAFS": "零售销售",
+    "HOUST": "新屋开工数",
+    "CSUSHPISA": "标普CoreLogic Case-Shiller房价指数",
+    "BOPGSTB": "贸易差额",
+    "IMPGS": "商品和服务进口"
   },
   "anomalies": {
     "title": "异动",

@@ -110,7 +110,7 @@ function IndicatorCard({ indicator, onClick }: IndicatorCardProps) {
             <div className="flex justify-between items-start">
                 <div>
                     <h3 className="text-sm font-medium text-[var(--text-secondary)] uppercase tracking-wide">
-                        {indicator.title}
+                        {t(`indicators.${indicator.id}`) || indicator.title}
                     </h3>
                     <div className="text-[10px] text-[var(--text-muted)] mt-1">
                         {indicator.frequency} • {indicator.units}

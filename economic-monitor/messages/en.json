@@ -75,7 +75,21 @@
     "selectAll": "Select All",
     "deselectAll": "Deselect All",
     "lastUpdated": "Last Updated",
-    "noData": "No data available"
+    "noData": "No data available",
+    "SOFR": "Secured Overnight Financing Rate",
+    "DGS2": "2-Year Treasury Yield",
+    "DGS10": "10-Year Treasury Yield",
+    "MORTGAGE30US": "30-Year Fixed Mortgage Rate",
+    "TEDRATE": "TED Spread",
+    "GDPC1": "Real Gross Domestic Product",
+    "UNRATE": "Unemployment Rate",
+    "PCEPI": "Personal Consumption Expenditures Price Index",
+    "PCE": "Personal Consumption Expenditures",
+    "RSAFS": "Retail Sales",
+    "HOUST": "New Housing Units Started",
+    "CSUSHPISA": "S&P CoreLogic Case-Shiller Home Price Index",
+    "BOPGSTB": "Trade Balance",
+    "IMPGS": "Imports of Goods and Services"
   },
   "anomalies": {
     "title": "Anomalies",
