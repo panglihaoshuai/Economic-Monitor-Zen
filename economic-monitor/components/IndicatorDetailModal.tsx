@@ -91,6 +91,9 @@ function getDateRange(range: TimeRange): { startDate: string; endDate: string } 
 
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
+// API base path - use new route
+const API_BASE = '/api/economic-data';
+
 // ========== Main Component ==========
 export function IndicatorDetailModal({ indicatorId, indicatorTitle, onClose }: Props) {
     const { t, language } = useLanguage();
@@ -103,7 +106,7 @@ export function IndicatorDetailModal({ indicatorId, indicatorTitle, onClose }: P
         const { startDate, endDate } = timeRange === 'custom' && customStart && customEnd
             ? { startDate: customStart, endDate: customEnd }
             : getDateRange(timeRange);
-        return `/api/data?seriesId=${indicatorId}&startDate=${startDate}&endDate=${endDate}`;
+        return `${API_BASE}?seriesId=${indicatorId}&startDate=${startDate}&endDate=${endDate}`;
     }, [indicatorId, timeRange, customStart, customEnd]);
 
     const { data, error, isLoading } = useSWR<IndicatorDetailResponse>(apiUrl, fetcher);
@@ -320,8 +323,8 @@ export function IndicatorDetailModal({ indicatorId, indicatorTitle, onClose }: P
                                         {data?.statistics?.currentValue?.toFixed(2)}
                                     </div>
                                     <div className={`flex items-center gap-1 mt-2 text-sm ${(data?.statistics?.zScore || 0) > 0
-                                            ? 'text-[var(--status-success)]'
-                                            : 'text-[var(--status-error)]'
+                                        ? 'text-[var(--status-success)]'
+                                        : 'text-[var(--status-error)]'
                                         }`}>
                                         {(data?.statistics?.zScore || 0) > 0
                                             ? <TrendingUp className="w-4 h-4" />

@@ -19,7 +19,7 @@ export function TradeJournal() {
     const { t } = useTranslation();
 
     // 获取各种高风险指标，用于自动关联
-    const { data: indicatorsData } = useSWR('/api/data', fetcher);
+    const { data: indicatorsData } = useSWR('/api/economic-data', fetcher);
 
     // New Entry Form State
     const [newEntry, setNewEntry] = useState<Partial<TradeEntry>>({

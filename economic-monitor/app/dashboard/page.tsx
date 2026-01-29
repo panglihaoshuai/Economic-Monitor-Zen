@@ -50,7 +50,7 @@ const coreIndicators = ['SOFR', 'UNRATE', 'PCEPI', 'GDPC1'];
 export default function DashboardPage() {
   const { t, language } = useLanguage();
   const { data, error, isLoading, mutate } = useSWR<{ indicators: Indicator[] }>(
-    '/api/data',
+    '/api/economic-data',
     fetcher,
     { refreshInterval: 60000 }
   );

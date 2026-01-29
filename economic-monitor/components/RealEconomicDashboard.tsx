@@ -59,6 +59,9 @@ interface DashboardResponse {
 // ========== Fetcher ==========
 const fetcher = (url: string) => fetch(url).then(r => r.json());
 
+// API base path - use new route
+const API_BASE = '/api/economic-data';
+
 // ========== Sub-component: Indicator Card ==========
 
 interface IndicatorCardProps {
@@ -70,7 +73,7 @@ function IndicatorCard({ indicator, onClick }: IndicatorCardProps) {
     const { t, language } = useLanguage();
     // Fetch history for sparkline
     const { data: historyData } = useSWR<{ data: { value: number }[] }>(
-        `/api/data?seriesId=${indicator.id}&limit=50`,
+        `${API_BASE}?seriesId=${indicator.id}&limit=50`,
         fetcher
     );
 
@@ -170,7 +173,7 @@ function IndicatorCard({ indicator, onClick }: IndicatorCardProps) {
 // ========== Main Dashboard Component ==========
 
 export function RealEconomicDashboard() {
-    const { data, error, isLoading, mutate } = useSWR<DashboardResponse>('/api/data', fetcher);
+    const { data, error, isLoading, mutate } = useSWR<DashboardResponse>(API_BASE, fetcher);
     const { t, language } = useLanguage();
 
     // Modal state
