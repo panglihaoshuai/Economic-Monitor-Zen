@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 
 export const maxDuration = 300; // 5 分钟 (Vercel 免费版限制)
