@@ -4,14 +4,15 @@ import { useState } from 'react';
 import { ZenNavigation } from '@/components/ZenNavigation';
 import { RealEconomicDashboard } from '@/components/RealEconomicDashboard';
 import { TradeJournal } from '@/components/TradeJournal';
+import { DeepAnalysisDashboard } from '@/components/DeepAnalysisDashboard';
 import { ZenButton } from '@/components/ui/ZenUI';
-import { BarChart3, BookOpen } from 'lucide-react';
+import { BarChart3, BookOpen, BrainCircuit } from 'lucide-react';
 
 import { useTranslation } from '@/lib/language-context';
 import { LanguageToggle } from '@/components/ui/LanguageToggle';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'journal'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'journal' | 'analysis'>('dashboard');
   const { t } = useTranslation();
 
   return (
