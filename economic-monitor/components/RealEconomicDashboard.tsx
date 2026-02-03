@@ -164,7 +164,7 @@ const IndicatorCard = memo(function IndicatorCard({ indicator, historyData, onCl
             </div>
         </ZenCard>
     );
-}
+});
 
 // ========== Main Dashboard Component ==========
 
