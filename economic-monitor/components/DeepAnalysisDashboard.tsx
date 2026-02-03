@@ -138,44 +138,30 @@ export function DeepAnalysisDashboard() {
         });
     }, []);
 
-    const fetchAllAnalysis = useCallback(async () => {
+    const fetchAllAnalysis = useCallback(() => {
         setLoading(true);
-        try {
-            const startDate = getStartDate(timeRange);
-            const endDate = getEndDate();
+        const startDate = getStartDate(timeRange);
+        const endDate = getEndDate();
 
-            // 并行执行所有分析请求
-            const [volatilityRes, semanticRes, correlationRes, eventsRes] = await Promise.all([
-                fetch(`/api/volatility-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
-                fetch(`/api/semantic-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
-                fetch(`/api/correlation-analysis?seriesIds=${selectedIndicator},UNRATE,GDP&startDate=${startDate}&endDate=${endDate}`),
-                fetch(`/api/similar-events?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`)
-            ]);
-
-            if (volatilityRes.ok) {
-                const volatilityData = await volatilityRes.json();
-                setVolatilityAnalysis(volatilityData);
-            }
-
-            if (semanticRes.ok) {
-                const semanticData = await semanticRes.json();
-                setSemanticAnalysis(semanticData);
-            }
-
-            if (correlationRes.ok) {
-                const correlationData = await correlationRes.json();
-                setCorrelationMatrix(correlationData);
-            }
-
-            if (eventsRes.ok) {
-                const eventsData = await eventsRes.json();
-                setSimilarEvents(eventsData);
-            }
-        } catch (error) {
-            console.error('Error fetching analysis:', error);
-        } finally {
-            setLoading(false);
-        }
+        // 并行执行所有分析请求
+        Promise.all([
+            fetch(`/api/volatility-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
+            fetch(`/api/semantic-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
+            fetch(`/api/correlation-analysis?seriesIds=${selectedIndicator},UNRATE,GDP&startDate=${startDate}&endDate=${endDate}`),
+            fetch(`/api/similar-events?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`)
+        ]).then((responses) => Promise.all(responses.map(r => r.ok ? r.json() : null)))
+            .then(([volatilityData, semanticData, correlationData, eventsData]) => {
+                if (volatilityData) setVolatilityAnalysis(volatilityData);
+                if (semanticData) setSemanticAnalysis(semanticData);
+                if (correlationData) setCorrelationMatrix(correlationData);
+                if (eventsData) setSimilarEvents(eventsData);
+            })
+            .catch((error) => {
+                console.error('Error fetching analysis:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     }, [selectedIndicator, timeRange]);
 
     useEffect(() => {
