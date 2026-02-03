@@ -67,11 +67,16 @@ export function LanguageProvider({ children, initialLang = 'en' }: { children: R
     }
   };
 
-  const t = (key: string, params?: Record<string, string | number>): string => {
+  const t = (key: string, params?: Record<string, string | number> | string): string => {
     let text = flattenedMessages[language][key] || key;
 
+    // If params is a string, use it as fallback value
+    if (typeof params === 'string') {
+      return text || params;
+    }
+
     // Replace parameters
-    if (params) {
+    if (params && typeof params === 'object') {
       text = text.replace(/\{(\w+)\}/g, (match, paramName) => {
         const value = params[paramName];
         return value !== undefined ? String(value) : match;

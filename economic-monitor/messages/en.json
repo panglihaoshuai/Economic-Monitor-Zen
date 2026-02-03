@@ -213,6 +213,20 @@
       "uncertain": "Uncertain"
     }
   },
+  "analysis": {
+    "title": "Deep Analysis",
+    "subtitle": "Explore deep insights behind the data",
+    "quickSummary": "Quick Overview",
+    "quickSummaryText": "Current economic indicators show rising inflation pressure and high volatility. Strong negative correlation with unemployment rate, suggesting attention to Fed policy movements.",
+    "volatilityTrend": "Volatility Trend Analysis",
+    "volatilityTrendDesc": "Identify volatility changes and breakout points",
+    "semanticInsight": "Semantic Insights",
+    "semanticInsightDesc": "AI-driven deep interpretation and investment recommendations",
+    "correlationMatrix": "Cross-Asset Correlation Matrix",
+    "correlationMatrixDesc": "Explore relationships between different economic indicators",
+    "historicalEvents": "Historical Similar Events",
+    "historicalEventsDesc": "Reference history, gain insights into the future"
+  },
   "deepAnalysis": {
     "title": "Deep Analysis",
     "subtitle": "Advanced statistical analysis and insights",

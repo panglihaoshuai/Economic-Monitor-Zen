@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { ZenCard } from '@/components/ui/ZenUI';
 import { VolatilityTrendAnalysis } from '@/components/VolatilityTrendAnalysis';
-import { CorrelationMatrix } from '@/components/CorrelationMatrix';
-import { SemanticInsight } from '@/components/SemanticInsight';
+import CorrelationMatrix from '@/components/CorrelationMatrix';
+import SemanticInsight from '@/components/SemanticInsight';
 import { HistoricalEvents } from '@/components/HistoricalEvents';
 import { useTranslation } from '@/lib/language-context';
 import { TrendingUp, Network, BrainCircuit, Clock, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
@@ -144,7 +144,7 @@ export default function AnalysisPage({ indicatorId = 'CPIAUCSL', startDate, endD
                 {expandedSections.has('semantic') && (
                     <div className="animate-fade-in">
                         <SemanticInsight
-                            indicatorId={selectedIndicator}
+                            seriesId={selectedIndicator}
                             startDate={selectedStartDate}
                             endDate={selectedEndDate}
                         />
@@ -181,7 +181,7 @@ export default function AnalysisPage({ indicatorId = 'CPIAUCSL', startDate, endD
                 {expandedSections.has('correlation') && (
                     <div className="animate-fade-in">
                         <CorrelationMatrix
-                            indicatorIds={['CPIAUCSL', 'UNRATE', 'GDP', 'FEDFUNDS']}
+                            seriesIds={['CPIAUCSL', 'UNRATE', 'GDP', 'FEDFUNDS']}
                             startDate={selectedStartDate}
                             endDate={selectedEndDate}
                         />

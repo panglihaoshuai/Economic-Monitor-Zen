@@ -22,7 +22,7 @@ interface HistoricalEventsProps {
 }
 
 export function HistoricalEvents({ indicatorId, startDate, endDate }: HistoricalEventsProps) {
-    const { t, locale } = useLanguage();
+    const { t, language } = useLanguage();
     const [events, setEvents] = useState<HistoricalEvent[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
-                        {locale === 'zh' ? '历史相似事件' : 'Historical Similar Events'}
+                        {language === 'zh' ? '历史相似事件' : 'Historical Similar Events'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -111,7 +111,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Calendar className="h-5 w-5" />
-                        {locale === 'zh' ? '历史相似事件' : 'Historical Similar Events'}
+                        {language === 'zh' ? '历史相似事件' : 'Historical Similar Events'}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -129,10 +129,10 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    {locale === 'zh' ? '历史相似事件' : 'Historical Similar Events'}
+                    {language === 'zh' ? '历史相似事件' : 'Historical Similar Events'}
                 </CardTitle>
                 <CardDescription>
-                    {locale === 'zh'
+                    {language === 'zh'
                         ? '基于当前市场状况的历史相似事件分析'
                         : 'Analysis of historical events similar to current market conditions'}
                 </CardDescription>
@@ -140,7 +140,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
             <CardContent>
                 {events.length === 0 ? (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        {locale === 'zh' ? '暂无历史相似事件' : 'No historical similar events found'}
+                        {language === 'zh' ? '暂无历史相似事件' : 'No historical similar events found'}
                     </div>
                 ) : (
                     <div className="space-y-4">
@@ -158,8 +158,8 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                     {/* 时间线节点 */}
                                     <div
                                         className={`absolute left-2.5 w-3 h-3 rounded-full border-2 ${selectedEvent === event
-                                                ? 'bg-primary border-primary scale-125'
-                                                : getImpactColor(event.impact).split(' ')[0]
+                                            ? 'bg-primary border-primary scale-125'
+                                            : getImpactColor(event.impact).split(' ')[0]
                                             }`}
                                     ></div>
 
@@ -171,7 +171,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                             <div className="flex items-center gap-2">
                                                 {getImpactIcon(event.impact)}
                                                 <span className="font-semibold text-sm">
-                                                    {new Date(event.date).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
+                                                    {new Date(event.date).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', {
                                                         year: 'numeric',
                                                         month: 'long',
                                                         day: 'numeric',
@@ -179,7 +179,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                                 </span>
                                             </div>
                                             <div className={`text-sm font-medium ${getSimilarityColor(event.similarity)}`}>
-                                                {locale === 'zh' ? '相似度' : 'Similarity'}: {(event.similarity * 100).toFixed(0)}%
+                                                {language === 'zh' ? '相似度' : 'Similarity'}: {(event.similarity * 100).toFixed(0)}%
                                             </div>
                                         </div>
 
@@ -210,14 +210,14 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                             <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
                                 <h4 className="font-semibold mb-3 flex items-center gap-2">
                                     <Info className="h-4 w-4" />
-                                    {locale === 'zh' ? '事件详情' : 'Event Details'}
+                                    {language === 'zh' ? '事件详情' : 'Event Details'}
                                 </h4>
                                 <div className="space-y-2 text-sm">
                                     <div>
                                         <span className="font-medium">
-                                            {locale === 'zh' ? '日期：' : 'Date: '}
+                                            {language === 'zh' ? '日期：' : 'Date: '}
                                         </span>
-                                        {new Date(selectedEvent.date).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
+                                        {new Date(selectedEvent.date).toLocaleDateString(language === 'zh' ? 'zh-CN' : 'en-US', {
                                             year: 'numeric',
                                             month: 'long',
                                             day: 'numeric',
@@ -225,7 +225,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                     </div>
                                     <div>
                                         <span className="font-medium">
-                                            {locale === 'zh' ? '影响：' : 'Impact: '}
+                                            {language === 'zh' ? '影响：' : 'Impact: '}
                                         </span>
                                         <span className={`capitalize ${getSimilarityColor(selectedEvent.similarity)}`}>
                                             {selectedEvent.impact}
@@ -233,7 +233,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                     </div>
                                     <div>
                                         <span className="font-medium">
-                                            {locale === 'zh' ? '相似度：' : 'Similarity: '}
+                                            {language === 'zh' ? '相似度：' : 'Similarity: '}
                                         </span>
                                         <span className={getSimilarityColor(selectedEvent.similarity)}>
                                             {(selectedEvent.similarity * 100).toFixed(1)}%
@@ -241,7 +241,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                     </div>
                                     <div>
                                         <span className="font-medium">
-                                            {locale === 'zh' ? '相关指标：' : 'Related Indicators: '}
+                                            {language === 'zh' ? '相关指标：' : 'Related Indicators: '}
                                         </span>
                                         {selectedEvent.relatedIndicators.join(', ')}
                                     </div>
@@ -257,7 +257,7 @@ export function HistoricalEvents({ indicatorId, startDate, endDate }: Historical
                                 onClick={fetchHistoricalEvents}
                                 disabled={loading}
                             >
-                                {locale === 'zh' ? '刷新' : 'Refresh'}
+                                {language === 'zh' ? '刷新' : 'Refresh'}
                             </Button>
                         </div>
                     </div>

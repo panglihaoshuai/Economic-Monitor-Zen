@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ZenButton } from '@/components/ui/ZenUI';
 import {
@@ -126,50 +126,47 @@ export function DeepAnalysisDashboard() {
     const [correlationMatrix, setCorrelationMatrix] = useState<CorrelationMatrix | null>(null);
     const [similarEvents, setSimilarEvents] = useState<SimilarEventsResult | null>(null);
 
-    const toggleSection = (section: string) => {
-        const newExpanded = new Set(expandedSections);
-        if (newExpanded.has(section)) {
-            newExpanded.delete(section);
-        } else {
-            newExpanded.add(section);
-        }
-        setExpandedSections(newExpanded);
-    };
+    const toggleSection = useCallback((section: string) => {
+        setExpandedSections((prev) => {
+            const newExpanded = new Set(prev);
+            if (newExpanded.has(section)) {
+                newExpanded.delete(section);
+            } else {
+                newExpanded.add(section);
+            }
+            return newExpanded;
+        });
+    }, []);
 
-    const fetchAllAnalysis = async () => {
+    const fetchAllAnalysis = useCallback(async () => {
         setLoading(true);
         try {
-            // Fetch volatility analysis
-            const volatilityRes = await fetch(
-                `/api/volatility-analysis?seriesId=${selectedIndicator}&startDate=${getStartDate(timeRange)}&endDate=${getEndDate()}`
-            );
+            const startDate = getStartDate(timeRange);
+            const endDate = getEndDate();
+
+            // 并行执行所有分析请求
+            const [volatilityRes, semanticRes, correlationRes, eventsRes] = await Promise.all([
+                fetch(`/api/volatility-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
+                fetch(`/api/semantic-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
+                fetch(`/api/correlation-analysis?seriesIds=${selectedIndicator},UNRATE,GDP&startDate=${startDate}&endDate=${endDate}`),
+                fetch(`/api/similar-events?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`)
+            ]);
+
             if (volatilityRes.ok) {
                 const volatilityData = await volatilityRes.json();
                 setVolatilityAnalysis(volatilityData);
             }
 
-            // Fetch semantic analysis
-            const semanticRes = await fetch(
-                `/api/semantic-analysis?seriesId=${selectedIndicator}&startDate=${getStartDate(timeRange)}&endDate=${getEndDate()}`
-            );
             if (semanticRes.ok) {
                 const semanticData = await semanticRes.json();
                 setSemanticAnalysis(semanticData);
             }
 
-            // Fetch correlation analysis
-            const correlationRes = await fetch(
-                `/api/correlation-analysis?seriesIds=${selectedIndicator},UNRATE,GDP&startDate=${getStartDate(timeRange)}&endDate=${getEndDate()}`
-            );
             if (correlationRes.ok) {
                 const correlationData = await correlationRes.json();
                 setCorrelationMatrix(correlationData);
             }
 
-            // Fetch similar events
-            const eventsRes = await fetch(
-                `/api/similar-events?seriesId=${selectedIndicator}&startDate=${getStartDate(timeRange)}&endDate=${getEndDate()}`
-            );
             if (eventsRes.ok) {
                 const eventsData = await eventsRes.json();
                 setSimilarEvents(eventsData);
@@ -179,7 +176,7 @@ export function DeepAnalysisDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedIndicator, timeRange]);
 
     useEffect(() => {
         fetchAllAnalysis();
@@ -435,8 +432,8 @@ export function DeepAnalysisDashboard() {
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div className={`p-2 rounded-full ${breakout.type === 'upward'
-                                                            ? 'bg-green-100 dark:bg-green-900/30'
-                                                            : 'bg-red-100 dark:bg-red-900/30'
+                                                        ? 'bg-green-100 dark:bg-green-900/30'
+                                                        : 'bg-red-100 dark:bg-red-900/30'
                                                         }`}>
                                                         {breakout.type === 'upward' ? (
                                                             <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -479,10 +476,10 @@ export function DeepAnalysisDashboard() {
                                             <div
                                                 key={index}
                                                 className={`p-4 rounded-lg border ${cluster.clusterType === 'low'
-                                                        ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                                                        : cluster.clusterType === 'medium'
-                                                            ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
-                                                            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                                                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                                                    : cluster.clusterType === 'medium'
+                                                        ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+                                                        : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                                                     }`}
                                             >
                                                 <div className="font-semibold text-slate-900 dark:text-white mb-2">
@@ -543,8 +540,8 @@ export function DeepAnalysisDashboard() {
                                     <div className="flex items-center gap-2 mb-2">
                                         {getTrendIcon(semanticAnalysis.trend.direction)}
                                         <span className={`font-medium ${semanticAnalysis.trend.direction === 'up' ? 'text-green-600 dark:text-green-400' :
-                                                semanticAnalysis.trend.direction === 'down' ? 'text-red-600 dark:text-red-400' :
-                                                    'text-blue-600 dark:text-blue-400'
+                                            semanticAnalysis.trend.direction === 'down' ? 'text-red-600 dark:text-red-400' :
+                                                'text-blue-600 dark:text-blue-400'
                                             }`}>
                                             {t(`deepAnalysis.${semanticAnalysis.trend.direction}`, semanticAnalysis.trend.direction)}
                                         </span>
@@ -575,8 +572,8 @@ export function DeepAnalysisDashboard() {
                                     </h4>
                                     <div className="flex items-center gap-2 mb-2">
                                         <span className={`font-medium ${semanticAnalysis.change.significance === 'significant' ? 'text-red-600 dark:text-red-400' :
-                                                semanticAnalysis.change.significance === 'moderate' ? 'text-orange-600 dark:text-orange-400' :
-                                                    'text-green-600 dark:text-green-400'
+                                            semanticAnalysis.change.significance === 'moderate' ? 'text-orange-600 dark:text-orange-400' :
+                                                'text-green-600 dark:text-green-400'
                                             }`}>
                                             {semanticAnalysis.change.percentage > 0 ? '+' : ''}{semanticAnalysis.change.percentage.toFixed(2)}%
                                         </span>
@@ -679,8 +676,8 @@ export function DeepAnalysisDashboard() {
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div className={`p-2 rounded-full ${corr.correlation > 0
-                                                            ? 'bg-green-100 dark:bg-green-900/30'
-                                                            : 'bg-red-100 dark:bg-red-900/30'
+                                                        ? 'bg-green-100 dark:bg-green-900/30'
+                                                        : 'bg-red-100 dark:bg-red-900/30'
                                                         }`}>
                                                         {corr.correlation > 0 ? (
                                                             <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />

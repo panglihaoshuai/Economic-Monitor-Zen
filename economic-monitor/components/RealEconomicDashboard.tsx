@@ -1,7 +1,7 @@
 'use client';
 
 import useSWR from 'swr';
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { ZenCard, ZenBadge, ZenButton, ZenSpinner } from './ui/ZenUI';
 import { ZenSparkline } from './ui/ZenSparkline';
 import { ArrowUpRight, ArrowDownRight, AlertTriangle, Info, RefreshCw } from 'lucide-react';
@@ -66,18 +66,14 @@ const API_BASE = '/api/economic-data';
 
 interface IndicatorCardProps {
     indicator: IndicatorSummary;
+    historyData?: any;
     onClick: () => void;
 }
 
-function IndicatorCard({ indicator, onClick }: IndicatorCardProps) {
+const IndicatorCard = memo(function IndicatorCard({ indicator, historyData, onClick }: IndicatorCardProps) {
     const { t, language } = useLanguage();
-    // Fetch history for sparkline
-    const { data: historyData } = useSWR<{ data: { value: number }[] }>(
-        `${API_BASE}?seriesId=${indicator.id}&limit=50`,
-        fetcher
-    );
-
-    const values = historyData?.data?.map(d => d.value).reverse() || [];
+    // 使用父组件传递的历史数据，不再发起独立请求
+    const values = historyData?.data?.map((d: any) => d.value).reverse() || [];
     const currentValue = indicator.latest?.value || 0;
     const isPositive = values.length > 1 ? currentValue > values[values.length - 2] : false;
 
@@ -179,6 +175,18 @@ export function RealEconomicDashboard() {
     // Modal state
     const [selectedIndicator, setSelectedIndicator] = useState<{ id: string; title: string } | null>(null);
 
+    // 预加载所有指标的历史数据 - 并行请求
+    const historyDataMap = useSWR(
+        data?.indicators ?
+            data.indicators.map(ind => `${API_BASE}?seriesId=${ind.id}&limit=50`) :
+            null,
+        (urls) => Promise.all(urls.map(url => fetch(url).then(r => r.json()))),
+        {
+            revalidateOnFocus: false,
+            dedupingInterval: 60000,
+        }
+    );
+
     if (error) return (
         <div className="p-10 text-center text-[var(--status-error)]">
             {t('zen.dashboard.error')}
@@ -213,9 +221,9 @@ export function RealEconomicDashboard() {
         ? (language === 'zh' ? '异常检测' : 'Anomaly Detection')
         : (language === 'zh' ? '标准分析' : 'Standard Analysis');
 
-    const handleIndicatorClick = (indicator: IndicatorSummary) => {
+    const handleIndicatorClick = useCallback((indicator: IndicatorSummary) => {
         setSelectedIndicator({ id: indicator.id, title: indicator.title });
-    };
+    }, []);
 
     return (
         <>
@@ -247,17 +255,19 @@ export function RealEconomicDashboard() {
                             <div className="h-px bg-[var(--status-warning)]/20 flex-1" />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {criticalIndicators.map(ind => (
+                            {criticalIndicators.map((ind, index) => (
                                 <IndicatorCard
                                     key={ind.id}
                                     indicator={ind}
+                                    historyData={historyDataMap.data?.[index]}
                                     onClick={() => handleIndicatorClick(ind)}
                                 />
                             ))}
-                            {warningIndicators.map(ind => (
+                            {warningIndicators.map((ind, index) => (
                                 <IndicatorCard
                                     key={ind.id}
                                     indicator={ind}
+                                    historyData={historyDataMap.data?.[criticalIndicators.length + index]}
                                     onClick={() => handleIndicatorClick(ind)}
                                 />
                             ))}
@@ -274,10 +284,11 @@ export function RealEconomicDashboard() {
                         <div className="h-px bg-[var(--stroke-light)] flex-1" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {sortedNormal.map(ind => (
+                        {sortedNormal.map((ind, index) => (
                             <IndicatorCard
                                 key={ind.id}
                                 indicator={ind}
+                                historyData={historyDataMap.data?.[criticalIndicators.length + warningIndicators.length + index]}
                                 onClick={() => handleIndicatorClick(ind)}
                             />
                         ))}

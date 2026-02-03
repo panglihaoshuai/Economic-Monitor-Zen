@@ -123,19 +123,31 @@ export async function GET(request: Request) {
             latestByIndicator[row.series_id].push(row);
         });
 
-        // 获取每个指标的最新值和检测异常
-        const indicators = [];
-        const anomalies = [];
+        // 获取每个指标的最新值和检测异常 - 并行执行
+        const indicators: any[] = [];
+        const anomalies: any[] = [];
 
-        for (const [sid, records] of Object.entries(latestByIndicator)) {
-            if (records.length === 0) continue;
+        // 并行执行所有异常检测
+        const anomalyPromises = Object.entries(latestByIndicator)
+            .filter(([_, records]) => records.length > 0)
+            .map(async ([sid, records]) => {
+                const indicator = INDICATORS[sid] || { title: sid, category: 'unknown' };
+                const latest = records[0];
 
-            const indicator = INDICATORS[sid] || { title: sid, category: 'unknown' };
-            const latest = records[0];
+                // 检测异常
+                const anomalyResult = await detectAnomalies(sid, records);
 
-            // 检测异常
-            const anomalyResult = await detectAnomalies(sid, records);
+                return {
+                    sid,
+                    indicator,
+                    latest,
+                    anomalyResult
+                };
+            });
 
+        const results = await Promise.all(anomalyPromises);
+
+        results.forEach(({ sid, indicator, latest, anomalyResult }) => {
             indicators.push({
                 ...indicator,
                 series_id: sid,
@@ -149,7 +161,7 @@ export async function GET(request: Request) {
             if (anomalyResult.severity !== 'normal') {
                 anomalies.push(anomalyResult);
             }
-        }
+        });
 
         return NextResponse.json({
             indicators,

@@ -43,18 +43,19 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // 获取所有系列的数据
+        // 获取所有系列的数据 - 并行执行
         const seriesDataMap = new Map<string, DataPoint[]>();
         const seriesInfoMap = new Map<string, FREDSeriesInfo>();
 
-        for (const seriesId of seriesIds) {
+        // 并行获取所有系列数据
+        const fetchPromises = seriesIds.map(async (seriesId) => {
             try {
                 // 获取FRED数据
                 const fredData: FREDSeries = await fetchFREDData(seriesId, startDate);
 
                 if (!fredData || !fredData.observations || fredData.observations.length === 0) {
                     console.warn(`No data found for series: ${seriesId}`);
-                    continue;
+                    return null;
                 }
 
                 // 获取系列元数据
@@ -71,11 +72,20 @@ export async function GET(request: NextRequest) {
                         value: parseFloat(d.value)
                     }));
 
-                seriesDataMap.set(seriesId, dataPoints);
+                return { seriesId, dataPoints };
             } catch (error) {
                 console.error(`Failed to fetch data for ${seriesId}:`, error);
+                return null;
             }
-        }
+        });
+
+        const results = await Promise.all(fetchPromises);
+
+        results.forEach(result => {
+            if (result) {
+                seriesDataMap.set(result.seriesId, result.dataPoints);
+            }
+        });
 
         // 检查是否有足够的数据
         if (seriesDataMap.size < 2) {

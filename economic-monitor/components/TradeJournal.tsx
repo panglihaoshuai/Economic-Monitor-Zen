@@ -5,12 +5,10 @@ import { useTradeJournal, TradeEntry, EMOTION_LABELS, MARKET_CONDITION_LABELS } 
 import { TradeJournalEntry } from './TradeJournalEntry';
 import { ZenButton, ZenCard, ZenBadge } from './ui/ZenUI';
 import { Plus, Download, Upload, Filter, X } from 'lucide-react';
-import useSWR from 'swr';
 import { RealEconomicDashboard } from './RealEconomicDashboard';
 import { SmartAssetInput } from './ui/SmartAssetInput';
 import { useTranslation } from '@/lib/language-context';
-
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+import { useSharedEconomicData } from '@/hooks/useSharedData';
 
 export function TradeJournal() {
     const journal = useTradeJournal();
@@ -18,8 +16,8 @@ export function TradeJournal() {
     const [activeTab, setActiveTab] = useState<'journal' | 'stats'>('journal');
     const { t } = useTranslation();
 
-    // 获取各种高风险指标，用于自动关联
-    const { data: indicatorsData } = useSWR('/api/economic-data', fetcher);
+    // 使用共享的经济数据 hook
+    const { data: indicatorsData } = useSharedEconomicData();
 
     // New Entry Form State
     const [newEntry, setNewEntry] = useState<Partial<TradeEntry>>({

@@ -213,6 +213,20 @@
       "uncertain": "不确定"
     }
   },
+  "analysis": {
+    "title": "深度分析",
+    "subtitle": "探索数据背后的深层洞察",
+    "quickSummary": "快速概览",
+    "quickSummaryText": "当前经济指标显示通胀压力持续上升，波动率处于高位。与失业率呈强负相关，建议关注美联储政策动向。",
+    "volatilityTrend": "波动率趋势分析",
+    "volatilityTrendDesc": "识别波动率变化和突破点",
+    "semanticInsight": "语义洞察",
+    "semanticInsightDesc": "AI驱动的深度解读和投资建议",
+    "correlationMatrix": "跨资产相关性矩阵",
+    "correlationMatrixDesc": "探索不同经济指标之间的关系",
+    "historicalEvents": "历史相似事件",
+    "historicalEventsDesc": "参考历史，洞察未来"
+  },
   "deepAnalysis": {
     "title": "深度分析",
     "subtitle": "探索数据背后的深层洞察",
