@@ -7,7 +7,7 @@ import { Locale, messages } from './i18n';
 type LanguageContextType = {
   language: Locale;
   setLanguage: (lang: Locale) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: (key: string, params?: Record<string, string | number> | string) => string;
   isLoading: boolean;
 };
 

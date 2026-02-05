@@ -47,6 +47,14 @@ export default function Home() {
                 <BookOpen className="w-4 h-4" />
                 {t('zen.nav.journal')}
               </button>
+              <button
+                onClick={() => setActiveTab('analysis')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-2
+                    ${activeTab === 'analysis' ? 'bg-white shadow-sm text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
+              >
+                <BrainCircuit className="w-4 h-4" />
+                {t('zen.nav.analysis', '深度分析')}
+              </button>
             </div>
 
             <LanguageToggle />
@@ -58,8 +66,10 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-6 py-10 animate-fade-in">
         {activeTab === 'dashboard' ? (
           <RealEconomicDashboard />
-        ) : (
+        ) : activeTab === 'journal' ? (
           <TradeJournal />
+        ) : (
+          <DeepAnalysisDashboard />
         )}
       </main>
 

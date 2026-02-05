@@ -148,13 +148,43 @@ export function DeepAnalysisDashboard() {
             fetch(`/api/volatility-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
             fetch(`/api/semantic-analysis?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`),
             fetch(`/api/correlation-analysis?seriesIds=${selectedIndicator},UNRATE,GDP&startDate=${startDate}&endDate=${endDate}`),
-            fetch(`/api/similar-events?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`)
+            fetch(`/api/historical-similar-events?seriesId=${selectedIndicator}&startDate=${startDate}&endDate=${endDate}`)
         ]).then((responses) => Promise.all(responses.map(r => r.ok ? r.json() : null)))
             .then(([volatilityData, semanticData, correlationData, eventsData]) => {
-                if (volatilityData) setVolatilityAnalysis(volatilityData);
-                if (semanticData) setSemanticAnalysis(semanticData);
-                if (correlationData) setCorrelationMatrix(correlationData);
-                if (eventsData) setSimilarEvents(eventsData);
+                // Fix: Unwrap the analysis object from API response
+                if (volatilityData && volatilityData.analysis) {
+                    setVolatilityAnalysis(volatilityData.analysis);
+                }
+
+                if (semanticData && semanticData.analysis) {
+                    setSemanticAnalysis(semanticData.analysis);
+                }
+
+                // Fix: Unwrap correlation matrix
+                if (correlationData && correlationData.correlationMatrix) {
+                    setCorrelationMatrix(correlationData.correlationMatrix);
+                }
+
+                // Fix: Map Historical Similar Events API response to UI model
+                if (eventsData && eventsData.similarEvents) {
+                    const mappedEvents: SimilarEventsResult = {
+                        currentSituation: eventsData.report ? eventsData.report.split('\n')[0] : '',
+                        overallInsight: eventsData.report || '',
+                        similarEvents: eventsData.similarEvents.map((e: any) => ({
+                            event: {
+                                date: `${e.startDate} - ${e.endDate}`,
+                                title: e.eventName,
+                                description: e.historicalContext,
+                                impact: 'neutral', // Infer or default
+                                relatedIndicators: []
+                            },
+                            similarity: e.similarityScore,
+                            currentContext: e.trendDescription,
+                            lessons: [e.investmentInsight]
+                        }))
+                    };
+                    setSimilarEvents(mappedEvents);
+                }
             })
             .catch((error) => {
                 console.error('Error fetching analysis:', error);
