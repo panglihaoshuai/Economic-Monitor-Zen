@@ -175,6 +175,12 @@ export function RealEconomicDashboard() {
     // Modal state
     const [selectedIndicator, setSelectedIndicator] = useState<{ id: string; title: string } | null>(null);
 
+    // ⚠️ All hooks MUST be called before any conditional returns!
+    // This is a React rule: hooks must be called in the same order every render.
+    const handleIndicatorClick = useCallback((indicator: IndicatorSummary) => {
+        setSelectedIndicator({ id: indicator.id, title: indicator.title });
+    }, []);
+
     // 预加载所有指标的历史数据 - 并行请求
     const historyDataMap = useSWR(
         data?.indicators ?
@@ -187,6 +193,7 @@ export function RealEconomicDashboard() {
         }
     );
 
+    // Now we can have conditional returns after all hooks are called
     if (error) return (
         <div className="p-10 text-center text-[var(--status-error)]">
             {t('zen.dashboard.error')}
@@ -220,10 +227,6 @@ export function RealEconomicDashboard() {
     const methodLabel = data.summary.anomalyCount > 0
         ? (language === 'zh' ? '异常检测' : 'Anomaly Detection')
         : (language === 'zh' ? '标准分析' : 'Standard Analysis');
-
-    const handleIndicatorClick = useCallback((indicator: IndicatorSummary) => {
-        setSelectedIndicator({ id: indicator.id, title: indicator.title });
-    }, []);
 
     return (
         <>

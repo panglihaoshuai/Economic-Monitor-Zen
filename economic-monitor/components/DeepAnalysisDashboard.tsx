@@ -280,7 +280,7 @@ export function DeepAnalysisDashboard() {
                             <ZenButton
                                 onClick={fetchAllAnalysis}
                                 disabled={loading}
-                                variant="outline"
+                                variant="secondary"
                                 size="sm"
                             >
                                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
